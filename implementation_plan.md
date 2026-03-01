@@ -26,7 +26,7 @@ Strictly following the Graphic Charter in `spec.md`:
   - **Main**: Centered proverb card with theme input, "Skip" button, Favorites toggle, and **Meditation Note** input.
   - **Themes / Library**: Grid/List of user categories, a dedicated "Favoris" section, and access to the **Wisdom Garden (Saisons)**.
   - **Settings**: Toggle "Aide à la catégorisation" and "Notifications" (Android).
-  - **Portability**: View with buttons to "Exporter" (saves to file) and "Importer" (loads from file) using native OS pickers.
+  - **Portability**: View with buttons to "Exporter" (saves metadata/references only, decorrelated from biblical text) and "Importer" using native OS pickers.
 
 ## Verification Plan
 1. **PWA Audit**: Verify installability and offline support via Lighthouse.

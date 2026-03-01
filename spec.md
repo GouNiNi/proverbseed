@@ -46,6 +46,7 @@
 - **Export**: Ability to export the entire personal database (categorizations, themes, and favorites) into a single file.
 - **Import**: Ability to import a previously exported file to restore or sync categorizations across devices.
 - **Integration**: Uses native OS file pickers to save to or load from cloud storage (Google Drive, iCloud, OneDrive) or local storage.
+- **Data Decorrelation**: The exported file is strictly **metadata-only**. It contains the user's themes, favorites, notes, and progress links via biblical references (IDs), but **excludes** the actual biblical text to ensure portability and privacy.
 
 ---
 
@@ -84,13 +85,14 @@
 
 ### 3.2 Data Management
 - **Dataset**: Static **JSON** extraction of the Book of Proverbs (Louis Segond 1910). Focused on chapters 10-22 and 25-29.
-- **Storage Layer**: **localForage** (IndexedDB wrapper) to handle all user-generated data (theme mappings, favorites, settings, progress). This ensures 100% local, serverless operation.
+- **Portability Logic**: To ensure data decorrelation, every piece of user data (notes, categories, favorites) is linked to a unique **Proverb Reference ID** (e.g., `PROV_10_1`).
+- **Storage Layer**: **localForage** (IndexedDB wrapper) to handle all user-generated data.
 - **Data Schema**:
-  - `proverbs`: The static list of verses.
+  - `proverbs`: The static list of verses (bundled with the app).
   - `user_themes`: Array of custom theme names.
-  - `categorized_proverbs`: Mapping of Proverb IDs to Theme IDs.
-  - `favorites`: Array of Proverb IDs marked as favorites.
-  - `meditation_notes`: Mapping of Proverb IDs to user-written text notes.
+  - `categorized_proverbs`: Mapping of **Proverb IDs** to Theme IDs.
+  - `favorites`: Array of **Proverb IDs** marked as favorites.
+  - `meditation_notes`: Mapping of **Proverb IDs** to user-written text notes.
   - `user_stats`: Data tracking consistency and growth for the "Wisdom Garden".
   - `settings`: User preferences.
 
