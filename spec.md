@@ -20,9 +20,15 @@
 - **Feature**: Ability to skip a proverb without categorizing it.
 - **Logic**: Skipped proverbs are returned to the pool and will reappear later in the random rotation, ensuring no verse is lost or permanently ignored.
 
-### 1.5 Personal Explorer & Library
-- **Feature**: A dedicated view to browse the personal categorized database.
+### 1.5 Personal Explorer & Library (Theme CRUD)
+- **Feature**: A dedicated view to browse and manage the personal categorized database.
 - **Functionality**: Users can select a theme and see all proverbs they have assigned to it, facilitating topical study.
+- **Theme Management (CRUD)**:
+  - **Create**: Add new themes on the fly.
+  - **Read**: View themes and their associated proverbs.
+  - **Update**: Rename themes (updates all associated tags automatically).
+  - **Delete**: Remove a theme. *This triggers a warning message explaining that all proverbs under this theme will be unlinked from it (but not deleted from the database).*
+
 
 ### 1.6 Progression Insight & "Saisons" (Wisdom Garden)
 - **Feature**: A discreet indicator of progress and a visual growth representation.
