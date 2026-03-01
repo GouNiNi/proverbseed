@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
+
+:root {
+  --color-primary: #A3B18A;
+  --color-secondary: #5D4037;
+  --color-supporting: #C6AC8F;
+  --color-background: #FAF9F6;
+  --color-text: #3E2723;
+  --color-card-bg: #FFFFFF; /* Slightly lighter than background for cards */
+
+  --font-title: 'Great Vibes', cursive;
+  --font-body: 'Source Serif 4', serif;
+
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.08);
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-pill: 9999px;
+
+  --transition-fast: 300ms ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+.title-font {
+  font-family: var(--font-title);
+  font-weight: 400;
+}
+
+/* Base button styles */
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: none;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary:hover {
+  background-color: #92a278;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-secondary);
+  border: 1px solid var(--color-secondary);
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(93, 64, 55, 0.05);
+}
+
+.btn-ghost {
+  color: var(--color-supporting);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+}
+
+.btn-ghost:hover {
+  background-color: rgba(198, 172, 143, 0.1);
+}
+
+/* Card styles */
+.card {
+  background-color: var(--color-card-bg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: 24px;
+}
+
+/* Text inputs */
+input, textarea {
+  font-family: inherit;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-supporting);
+  color: var(--color-text);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+  width: 100%;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Utility classes */
+.fade-enter {
+  opacity: 0;
+  transform: scale(0.98);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+.fade-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+.fade-exit-active {
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.splash-screen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background);
+  z-index: 9999;
+}
+
+.splash-title {
+  font-size: 4rem;
+  color: var(--color-primary);
+}
