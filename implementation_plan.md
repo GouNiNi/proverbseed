@@ -12,7 +12,7 @@ We are building "ProverbSeed", a PWA to read and categorize biblical proverbs (L
 ## Proposed Architecture
 
 ### 1. Data Layer
-- **Proverbs Dataset**: Static JSON file containing verses from Proverbs 10:1-22:16 and 25:1-29:27.
+- **Proverbs Dataset**: Static JSON file containing verses (10:1-22:16, 25:1-29:27) with **pre-baked themed suggestions** for the Categorization Aid.
 - **Extensibility**: The JSON and ID system (`PROV_CH_V`) will be designed to handle multi-verse ranges (e.g., `PROV_1_1-6`) from the start, allowing future expansion to other sections of the Book of Proverbs.
 - **Translation**: Louis Segond 1910.
 

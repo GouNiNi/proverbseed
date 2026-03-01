@@ -84,7 +84,7 @@
   - **iOS**: Strictly optimized web app experience (no background notifications as per user request).
 
 ### 3.2 Data Management
-- **Dataset**: Static **JSON** extraction of the Book of Proverbs (Louis Segond 1910). Focused on chapters 10-22 and 25-29.
+- **Dataset**: Static **JSON** extraction of the Book of Proverbs (Louis Segond 1910). Focused on chapters 10-22 and 25-29. Includes **pre-baked suggestions** for each proverb (10-15 standard themes).
 - **Extensible Schema**: Every "meditation unit" is defined by a unique **Reference ID** (e.g., `PROV_10_1` for a single verse or `PROV_1_1_6` for a range). This allows categorization of both single verses and multi-verse sections without breaking the database.
 - **Storage Layer**: **localForage** (IndexedDB wrapper) to handle all user-generated data.
 - **Data Schema**:
