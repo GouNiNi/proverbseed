@@ -1,53 +1,65 @@
-import React from 'react';
-import { Home, Default, BookOpen, Settings, Save } from 'lucide-react';
+import React, { useState } from 'react';
+import { Home, BookOpen, Settings, Menu, X } from 'lucide-react';
 
 export default function Navigation({ currentView, onViewChange }) {
-    const navItems = [
-        { id: 'home', icon: Home, label: 'Accueil' },
-        { id: 'library', icon: BookOpen, label: 'Bibliothèque' },
-        { id: 'portability', icon: Save, label: 'Sauvegardes' },
-        { id: 'settings', icon: Settings, label: 'Réglages' }
-    ];
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleNavigate = (view) => {
+        onViewChange(view);
+        setIsOpen(false);
+    };
 
     return (
-        <nav style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: 'var(--color-card-bg)',
-            boxShadow: '0 -4px 20px rgba(0,0,0,0.05)',
-            display: 'flex',
-            justifyContent: 'space-around',
-            padding: '12px 0 calc(12px + env(safe-area-inset-bottom)) 0',
-            zIndex: 100
-        }}>
-            {navItems.map(item => {
-                const Icon = item.icon;
-                const isActive = currentView === item.id;
-                return (
+        <>
+            {/* Overlay */}
+            {isOpen && (
+                <div
+                    className="nav-overlay fade-enter fade-enter-active"
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
+
+            {/* Home (left) */}
+            <button
+                className={`floating-nav-btn nav-home ${currentView === 'home' ? 'active' : ''}`}
+                onClick={() => handleNavigate('home')}
+                aria-label="Accueil"
+            >
+                <Home size={24} strokeWidth={1.5} />
+            </button>
+
+            {/* Expanded items */}
+            {isOpen && (
+                <div className="nav-expanded-controls fade-enter fade-enter-active">
                     <button
-                        key={item.id}
-                        onClick={() => onViewChange(item.id)}
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            color: isActive ? 'var(--color-primary)' : 'var(--color-supporting)',
-                            transition: 'var(--transition-fast)'
-                        }}
+                        className={`nav-expanded-btn ${currentView === 'library' ? 'active' : ''}`}
+                        onClick={() => handleNavigate('library')}
                     >
-                        <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                        <span style={{
-                            fontSize: '0.7rem',
-                            marginTop: '4px',
-                            fontWeight: isActive ? 600 : 400
-                        }}>
-                            {item.label}
-                        </span>
+                        <span>Bibliothèque</span>
+                        <div className="nav-icon-bg">
+                            <BookOpen size={20} strokeWidth={1.5} />
+                        </div>
                     </button>
-                )
-            })}
-        </nav>
+                    <button
+                        className={`nav-expanded-btn ${currentView === 'settings' ? 'active' : ''}`}
+                        onClick={() => handleNavigate('settings')}
+                    >
+                        <span>Réglages</span>
+                        <div className="nav-icon-bg">
+                            <Settings size={20} strokeWidth={1.5} />
+                        </div>
+                    </button>
+                </div>
+            )}
+
+            {/* Menu Toggle (right) */}
+            <button
+                className="floating-nav-btn nav-menu"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="Menu"
+            >
+                {isOpen ? <X size={24} strokeWidth={1.5} /> : <Menu size={24} strokeWidth={1.5} />}
+            </button>
+        </>
     );
 }

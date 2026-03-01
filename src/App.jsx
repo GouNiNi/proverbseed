@@ -2,19 +2,21 @@ import { useState, useEffect } from 'react';
 import HomeView from './views/HomeView';
 import LibraryView from './views/LibraryView';
 import SettingsView from './views/SettingsView';
-import PortabilityView from './views/PortabilityView';
 import Navigation from './components/Navigation';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [currentView, setCurrentView] = useState('home'); // home, library, portability, settings
+  const [hidingSplash, setHidingSplash] = useState(false);
+  const [currentView, setCurrentView] = useState('home'); // home, library, settings
 
   useEffect(() => {
-    // Show splash screen for 500ms
-    const timer = setTimeout(() => {
-      setShowSplash(false);
+    // Start hiding after 500ms
+    const hideTimer = setTimeout(() => {
+      setHidingSplash(true);
+      // Remove from DOM after fade completes (500ms)
+      setTimeout(() => setShowSplash(false), 500);
     }, 500);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(hideTimer);
   }, []);
 
   const renderView = () => {
@@ -23,8 +25,6 @@ function App() {
         return <HomeView />;
       case 'library':
         return <LibraryView />;
-      case 'portability':
-        return <PortabilityView />;
       case 'settings':
         return <SettingsView />;
       default:
@@ -32,17 +32,14 @@ function App() {
     }
   };
 
-  if (showSplash) {
-    return (
-      <div className="splash-screen fade-enter fade-enter-active">
-        <h1 className="splash-title title-font">ProverbSeed</h1>
-      </div>
-    );
-  }
-
   return (
     <div className="app-container fade-enter fade-enter-active" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <main style={{ flex: 1, padding: '24px', overflowY: 'auto', paddingBottom: '90px' }}>
+      {showSplash && (
+        <div className={`splash-screen ${hidingSplash ? 'hiding' : ''}`}>
+          <h1 className="splash-title title-font">ProverbSeed</h1>
+        </div>
+      )}
+      <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
         {renderView()}
       </main>
       <Navigation currentView={currentView} onViewChange={setCurrentView} />

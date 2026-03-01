@@ -16,7 +16,7 @@ export const dbOptions = {
 };
 
 const defaultSettings = {
-    categorizationAid: true,
+    categorizationAid: false,
     notificationsEnabled: false,
     notificationTime: '08:00',
     notificationDays: [1, 2, 3, 4, 5, 6, 0] // 0 is Sunday
@@ -30,25 +30,39 @@ const defaultStats = {
 
 // Seed or initialize default values if they don't exist
 export const initDB = async () => {
-    const currentThemes = await store.getItem(dbOptions.USER_THEMES);
-    if (!currentThemes) {
-        await store.setItem(dbOptions.USER_THEMES, []);
-    }
+    console.log("[db.js] initDB start...");
+    try {
+        const currentThemes = await store.getItem(dbOptions.USER_THEMES);
+        console.log("[db.js] item fetched: USER_THEMES", currentThemes);
+        if (!currentThemes) {
+            await store.setItem(dbOptions.USER_THEMES, []);
+        }
 
-    const currentSettings = await store.getItem(dbOptions.SETTINGS);
-    if (!currentSettings) {
-        await store.setItem(dbOptions.SETTINGS, defaultSettings);
-    }
+        const currentSettings = await store.getItem(dbOptions.SETTINGS);
+        console.log("[db.js] item fetched: SETTINGS", currentSettings);
+        if (!currentSettings) {
+            await store.setItem(dbOptions.SETTINGS, defaultSettings);
+        }
 
-    const currentStats = await store.getItem(dbOptions.USER_STATS);
-    if (!currentStats) {
-        await store.setItem(dbOptions.USER_STATS, defaultStats);
-    }
+        const currentStats = await store.getItem(dbOptions.USER_STATS);
+        console.log("[db.js] item fetched: USER_STATS", currentStats);
+        if (!currentStats) {
+            await store.setItem(dbOptions.USER_STATS, defaultStats);
+        }
 
-    // Ensure arrays/objects exist
-    if (!await store.getItem(dbOptions.CATEGORIZED_PROVERBS)) await store.setItem(dbOptions.CATEGORIZED_PROVERBS, {});
-    if (!await store.getItem(dbOptions.FAVORITES)) await store.setItem(dbOptions.FAVORITES, []);
-    if (!await store.getItem(dbOptions.MEDITATION_NOTES)) await store.setItem(dbOptions.MEDITATION_NOTES, {});
+        // Ensure arrays/objects exist
+        console.log("[db.js] checking CATEGORIZED_PROVERBS...");
+        if (!await store.getItem(dbOptions.CATEGORIZED_PROVERBS)) await store.setItem(dbOptions.CATEGORIZED_PROVERBS, {});
+        console.log("[db.js] checking FAVORITES...");
+        if (!await store.getItem(dbOptions.FAVORITES)) await store.setItem(dbOptions.FAVORITES, []);
+        console.log("[db.js] checking MEDITATION_NOTES...");
+        if (!await store.getItem(dbOptions.MEDITATION_NOTES)) await store.setItem(dbOptions.MEDITATION_NOTES, {});
+
+        console.log("[db.js] initDB complete!");
+    } catch (error) {
+        console.error("[db.js] error inside initDB:", error);
+        throw error;
+    }
 };
 
 export const getProverbById = (id) => {

@@ -16,9 +16,11 @@
 - **Feature**: A toggleable assistant accessible during the categorization process.
 - **Functionality**: When active, provides a list of suggested themes based on the proverb's content to help the user start their categorization if they lack inspiration.
 
-### 1.4 Skip & Recycle Logic
-- **Feature**: Ability to skip a proverb without categorizing it.
-- **Logic**: Skipped proverbs are returned to the pool and will reappear later in the random rotation, ensuring no verse is lost or permanently ignored.
+### 1.4 Navigation, Skip & Recycle Logic
+- **Feature**: Ability to navigate between proverbs via gestures or discreet UI.
+- **Gestures**: Swiping left or right on the screen navigates to the previous or next proverb.
+- **UI**: A discreet arrow at the bottom right of the verse can be used to skip to the next proverb.
+- **Logic**: Skipped proverbs are returned to the pool and will reappear later in the random rotation.
 
 ### 1.5 Personal Explorer & Library (Theme CRUD)
 - **Feature**: A dedicated view to browse and manage the personal categorized database.
@@ -49,9 +51,9 @@
 - **Functionality**: A quick-access toggle (e.g., a heart icon) to highlight proverbs that particularly resonate with the user. Favorites can be viewed separately in the Library.
 
 ### 1.10 Data Portability (Export/Import)
+- **Feature**: Integrated within the "Settings" view.
 - **Export**: Ability to export the entire personal database (categorizations, themes, and favorites) into a single file.
 - **Import**: Ability to import a previously exported file to restore or sync categorizations across devices.
-- **Integration**: Uses native OS file pickers to save to or load from cloud storage (Google Drive, iCloud, OneDrive) or local storage.
 - **Data Decorrelation**: The exported file is strictly **metadata-only**. It contains the user's themes, favorites, notes, and progress links via biblical references (IDs), but **excludes** the actual biblical text to ensure portability and privacy.
 
 ---
@@ -59,14 +61,15 @@
 ## 2. Graphic Charter (Design)
 
 ### 2.1 Atmosphere & Aesthetic
-- **Core Feeling**: Peace, serenity, meditation, and spiritual growth.
-- **UI Style**: Minimalist, clean, with soft transitions and ample whitespace. Use of organic shapes (rounded corners) and subtle shadows (soft depth).
+- **Core Feeling**: Peace, serenity, meditation, and spiritual growth. Focus intensely on the Biblical text.
+- **UI Style**: Minimalist, clean. Subdued background with delicate, discrete curved lines. Floating, discrete icon-only navigation without labels or bottom bar.
+- **Motion**: Everything happens with a slow, smooth, peaceful fade transition (0.5s max).
 
 ### 2.2 Color Palette
 - **Primary (Sage Green)**: `#A3B18A` - Primary actions, progress indicators.
 - **Secondary (Moka)**: `#5D4037` - Emphasis, selected states, deep titles.
 - **Supporting (Sand)**: `#C6AC8F` - Borders, icons, secondary text.
-- **Background (Bone White)**: `#FAF9F6` - Main background (paper-like, low strain).
+- **Background (Bone White)**: `#FAF9F6` - Main background (paper-like, low strain) combined with a discrete subtle curved pattern.
 - **Text (Charcoal Brown)**: `#3E2723` - High readability content.
 
 ### 2.3 Typography
@@ -74,9 +77,11 @@
 - **Body & Functional Font**: `Source Serif 4` (Google Fonts) - Elegant, readable serif font for proverbs and UI text.
 
 ### 2.4 UI Elements & Motion
-- **Splash Screen**: 0.5s fade-in with calligraphic minimalist branding.
-- **Transitions**: 300ms smooth fades/blurs for proverb changes.
-- **Cards**: Minimalist centered cards with very soft shadows.
+- **Titles**: Titles like "Graine du Jour" use low-contrast coloring and soft fonts to remain extremely discreet compared to the central verse. They remain fixed during swipe navigation.
+- **Splash Screen**: Initial logo presentation followed by a smooth 0.5s fade-out transition.
+- **Atmosphere**: Peaceful, serenity. All interactive highlights (blue tap background) are disabled to maintain visual purity.
+- **Navigation**: Floating icons only. Home (bottom-left). A burger menu (bottom-right) expands to reveal "Bibliothèque" and "Réglages" with labels. When the menu is open, a semi-transparent, slightly blurred overlay covers the content to improve focus and readability. The Validation button is a floating contextual button at the bottom center, between Home and the Menu.
+- **Categorization UI**: Small, low-contrast, discrete. Placed at the very bottom of the view, just above the floating action button, ensuring the central proverb/verse can be perfectly centered on the screen with maximum whitespace. The typing input does not have heavy borders or visual wrappers, cleanly fading into the background. Space around the central verse is maximized.
 
 ---
 
