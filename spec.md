@@ -3,9 +3,9 @@
 ## 1. Project Features (Agnostic)
 
 ### 1.1 Proverb Discovery Engine
-- **Core Loop**: Presents one biblical proverb at a time. The delivery is randomized to encourage fresh meditation on each verse.
-- **Focus on Single Verses**: The dataset is strictly filtered to include only "one-liner" proverbs (sentences/aphorisms) from the Solomonic collections.
-- **Navigation**: Simple, intuitive controls to move to the next proverb.
+- **Core Loop**: Presents one biblical "unit" (proverb or multi-verse section) at a time. The delivery is randomized to encourage fresh meditation.
+- **Initial Focus**: Strictly filtered to include only "one-liner" proverbs (sentences/aphorisms) from the Solomonic collections.
+- **Future-Proofing**: The engine is designed to handle "wisdom units" which can be a single verse or a cluster of verses intended to be read together.
 
 ### 1.2 Advanced Categorization System
 - **Theme Assignment**: Users can tag each proverb with one or more custom themes (e.g., "Sagesse", "Parole", "Travail").
@@ -85,7 +85,7 @@
 
 ### 3.2 Data Management
 - **Dataset**: Static **JSON** extraction of the Book of Proverbs (Louis Segond 1910). Focused on chapters 10-22 and 25-29.
-- **Portability Logic**: To ensure data decorrelation, every piece of user data (notes, categories, favorites) is linked to a unique **Proverb Reference ID** (e.g., `PROV_10_1`).
+- **Extensible Schema**: Every "meditation unit" is defined by a unique **Reference ID** (e.g., `PROV_10_1` for a single verse or `PROV_1_1_6` for a range). This allows categorization of both single verses and multi-verse sections without breaking the database.
 - **Storage Layer**: **localForage** (IndexedDB wrapper) to handle all user-generated data.
 - **Data Schema**:
   - `proverbs`: The static list of verses (bundled with the app).
