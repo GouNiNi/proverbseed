@@ -23,6 +23,7 @@ export default defineConfig({
         name: 'ProverbSeed',
         short_name: 'ProverbSeed',
         description: 'Méditation biblique et sagesse',
+        version: packageJson.version,
         theme_color: '#A3B18A',
         background_color: '#FAF9F6',
         display: 'standalone',
