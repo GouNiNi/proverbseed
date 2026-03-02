@@ -52,6 +52,15 @@ function App() {
             if (settings?.notificationsEnabled) checkDailyNotification(settings);
         }, 60 * 1000);
 
+        // Vérification quand l'utilisateur revient sur l'app (après avoir switché)
+        const handleVisibilityChange = async () => {
+            if (document.visibilityState === 'visible') {
+                const settings = await dbStore.getItem(dbOptions.SETTINGS);
+                if (settings?.notificationsEnabled) checkDailyNotification(settings);
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         const handleShowTutorial = () => setShowTutorial(true);
         window.addEventListener('showTutorial', handleShowTutorial);
 
@@ -66,6 +75,7 @@ function App() {
 
         return () => {
             clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('showTutorial', handleShowTutorial);
             window.removeEventListener('languageChange', handleLanguageChange);
             window.removeEventListener('themeChange', handleThemeChange);
