@@ -48,11 +48,36 @@ export default function SettingsView() {
                 await disableNotifications();
             }
         }
+        if ((key === 'notificationTime' || key === 'notificationDays') && newSettings.notificationsEnabled) {
+            await updateSubscription(newSettings);
+        }
     };
 
+    const updateSubscription = async (currentSettings) => {
+        try {
+            const pushId = await dbStore.getItem('push_subscription_id');
+            if (!pushId) return;
+            await fetch(`${WORKER_URL}/update-subscription`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: pushId,
+                    notificationTime: currentSettings.notificationTime,
+                    notificationDays: currentSettings.notificationDays,
+                    language: currentSettings.language,
+                }),
+            });
+        } catch (err) {
+            console.error('Update subscription error:', err);
+        }
+    };
+
+    const WORKER_URL = 'https://proverbseed-push.jean-daniel-b33.workers.dev';
+    const VAPID_PUBLIC_KEY = 'BHivnUd7F8CRAIPzkfUxtWeAjqiaj12YsuPb-DoSf2UYimFAbJaM0QpyIJ_Awnec2nq-ndRhdM_AWuCeQu-GRJE';
+
     const enableNotifications = async (currentSettings) => {
-        if (!('Notification' in window)) {
-            alert(language === 'en' ? 'Notifications are not supported by your browser.' : 'Les notifications ne sont pas supportées par votre navigateur.');
+        if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+            alert(language === 'en' ? 'Push notifications are not supported by your browser.' : 'Les notifications push ne sont pas supportées par votre navigateur.');
             return;
         }
         const permission = await Notification.requestPermission();
@@ -63,33 +88,60 @@ export default function SettingsView() {
             await dbStore.setItem(dbOptions.SETTINGS, reverted);
             return;
         }
-        await registerPeriodicSync();
+        await subscribePush(currentSettings);
     };
 
     const disableNotifications = async () => {
-        if ('serviceWorker' in navigator) {
-            try {
-                const reg = await navigator.serviceWorker.ready;
-                if ('periodicSync' in reg) {
-                    await reg.periodicSync.unregister('daily-proverb');
-                }
-            } catch { /* ignore */ }
+        try {
+            const pushId = await dbStore.getItem('push_subscription_id');
+            if (pushId) {
+                await fetch(`${WORKER_URL}/unsubscribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: pushId }),
+                });
+                await dbStore.removeItem('push_subscription_id');
+            }
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            if (sub) await sub.unsubscribe();
+        } catch { /* ignore */ }
+    };
+
+    const subscribePush = async (currentSettings) => {
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            // Désabonner l'ancien abonnement si existant
+            const existing = await reg.pushManager.getSubscription();
+            if (existing) await existing.unsubscribe();
+
+            const subscription = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+            });
+
+            const res = await fetch(`${WORKER_URL}/subscribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subscription: subscription.toJSON(),
+                    notificationTime: currentSettings.notificationTime,
+                    notificationDays: currentSettings.notificationDays,
+                    language: currentSettings.language,
+                }),
+            });
+            const { id } = await res.json();
+            await dbStore.setItem('push_subscription_id', id);
+        } catch (err) {
+            console.error('Push subscription error:', err);
         }
     };
 
-    const registerPeriodicSync = async () => {
-        if (!('serviceWorker' in navigator)) return;
-        try {
-            const reg = await navigator.serviceWorker.ready;
-            if ('periodicSync' in reg) {
-                const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
-                if (status.state === 'granted') {
-                    await reg.periodicSync.register('daily-proverb', {
-                        minInterval: 12 * 60 * 60 * 1000, // 12h
-                    });
-                }
-            }
-        } catch { /* Periodic sync non disponible */ }
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
     };
 
     const toggleDay = async (dayValue) => {
