@@ -46,6 +46,12 @@ function App() {
             }
         });
 
+        // Vérification toutes les minutes quand l'app est au premier plan
+        const interval = setInterval(async () => {
+            const settings = await dbStore.getItem(dbOptions.SETTINGS);
+            if (settings?.notificationsEnabled) checkDailyNotification(settings);
+        }, 60 * 1000);
+
         const handleShowTutorial = () => setShowTutorial(true);
         window.addEventListener('showTutorial', handleShowTutorial);
 
@@ -59,6 +65,7 @@ function App() {
         window.addEventListener('themeChange', handleThemeChange);
 
         return () => {
+            clearInterval(interval);
             window.removeEventListener('showTutorial', handleShowTutorial);
             window.removeEventListener('languageChange', handleLanguageChange);
             window.removeEventListener('themeChange', handleThemeChange);
