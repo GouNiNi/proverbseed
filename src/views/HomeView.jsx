@@ -4,13 +4,13 @@ import { Heart, Check, Hash, Edit3, ArrowRight } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
 
-// Returns font size based on character length of the proverb text (+15% vs original)
+// Returns font size based on character length of the proverb text
 function getProverbFontSize(textLength) {
-    if (textLength < 120) return '2.2rem';
-    if (textLength < 200) return '1.8rem';
-    if (textLength < 320) return '1.5rem';
-    if (textLength < 480) return '1.25rem';
-    return '1.1rem';
+    if (textLength < 120) return '1.87rem';
+    if (textLength < 200) return '1.53rem';
+    if (textLength < 320) return '1.27rem';
+    if (textLength < 480) return '1.06rem';
+    return '0.94rem';
 }
 
 export default function HomeView({ pendingEditId = null, onClearPendingEdit = null }) {
