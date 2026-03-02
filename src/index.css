@@ -311,6 +311,8 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   min-height: 500px;
+  max-height: 85vh;
+  /* Prevents overflow on smaller screens */
 }
 
 .tutorial-close-btn {
