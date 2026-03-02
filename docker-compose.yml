@@ -1,15 +1,12 @@
 services:
   # ProverbSeed: Sert les fichiers compilés (dist) par Nginx
   proverbseed:
-    image: nginx:alpine
+    build: .
     container_name: proverbseed
     volumes:
-      # On monte le dossier dist généré par le build de Vite
-      - ./dist:/usr/share/nginx/html
-      # On monte la config Nginx pour le support SPA/PWA
+      # On garde uniquement la config Nginx si on veut pouvoir la modifier sans rebuild, 
+      # mais elle est déjà copiée dans le Dockerfile. On peut la laisser pour le dev.
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    # Debug: Teste la configuration avant de lancer
-    command: sh -c "nginx -t && nginx -g 'daemon off;'"
     restart: always
     networks:
       - proxy
