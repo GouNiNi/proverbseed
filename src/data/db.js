@@ -19,7 +19,8 @@ const defaultSettings = {
     categorizationAid: false,
     notificationsEnabled: false,
     notificationTime: '08:00',
-    notificationDays: [1, 2, 3, 4, 5, 6, 0] // 0 is Sunday
+    notificationDays: [1, 2, 3, 4, 5, 6, 0], // 0 is Sunday
+    hasSeenTutorial: false
 };
 
 const defaultStats = {

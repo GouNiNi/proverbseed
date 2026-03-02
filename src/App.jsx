@@ -3,11 +3,27 @@ import HomeView from './views/HomeView';
 import LibraryView from './views/LibraryView';
 import SettingsView from './views/SettingsView';
 import Navigation from './components/Navigation';
+import TutorialOverlay from './components/TutorialOverlay';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [hidingSplash, setHidingSplash] = useState(false);
   const [currentView, setCurrentView] = useState('home'); // home, library, settings
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  useEffect(() => {
+    import('./data/db').then(({ dbStore, dbOptions }) => {
+      dbStore.getItem(dbOptions.SETTINGS).then(settings => {
+        if (settings && settings.hasSeenTutorial === false) {
+          setShowTutorial(true);
+        }
+      });
+    });
+
+    const handleShowTutorial = () => setShowTutorial(true);
+    window.addEventListener('showTutorial', handleShowTutorial);
+    return () => window.removeEventListener('showTutorial', handleShowTutorial);
+  }, []);
 
   useEffect(() => {
     // Start hiding after 500ms
@@ -43,6 +59,8 @@ function App() {
         {renderView()}
       </main>
       <Navigation currentView={currentView} onViewChange={setCurrentView} />
+
+      {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
     </div>
   );
 }

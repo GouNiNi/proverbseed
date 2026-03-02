@@ -274,3 +274,156 @@ textarea:focus {
   z-index: 40;
   transition: opacity var(--transition-slow);
 }
+
+/* Tutorial Overlay Styles */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(62, 39, 35, 0.8);
+  /* Darker backdrop for focus */
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow);
+}
+
+.tutorial-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tutorial-modal {
+  background-color: var(--color-background);
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 24px 24px;
+  position: relative;
+  box-shadow: var(--shadow-hover);
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
+}
+
+.tutorial-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: var(--color-supporting);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.tutorial-close-btn:hover {
+  color: var(--color-secondary);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.tutorial-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  padding-bottom: 20px;
+}
+
+.tutorial-illustration {
+  background-color: white;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.os-section h3 {
+  font-size: 1rem;
+  margin-bottom: 12px;
+  text-align: center;
+  color: var(--color-secondary);
+}
+
+.icon-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.icon-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-primary);
+}
+
+.icon-step span {
+  font-size: 0.75rem;
+  color: var(--color-secondary);
+  text-align: center;
+}
+
+.arrow {
+  color: var(--color-supporting);
+  font-weight: bold;
+}
+
+@keyframes bounceSlow {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.bouncing-icon {
+  animation: bounceSlow 2s infinite ease-in-out;
+}
+
+.tutorial-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tutorial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tutorial-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-supporting);
+  opacity: 0.5;
+  transition: all var(--transition-fast);
+}
+
+.tutorial-dots .dot.active {
+  background-color: var(--color-primary);
+  opacity: 1;
+  width: 16px;
+  border-radius: 4px;
+}

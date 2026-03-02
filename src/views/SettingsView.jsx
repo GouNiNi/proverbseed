@@ -202,7 +202,18 @@ export default function SettingsView() {
                     onChange={handleImport}
                 />
             </div>
-            <div style={{ marginTop: '40px', textAlign: 'center', opacity: 0.5, fontSize: '0.8rem' }}>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
+                <button
+                    className="btn-ghost"
+                    onClick={() => window.dispatchEvent(new Event('showTutorial'))}
+                    style={{ fontSize: '0.9rem' }}
+                >
+                    Revoir le tutoriel d'accueil
+                </button>
+            </div>
+
+            <div style={{ marginTop: '20px', textAlign: 'center', opacity: 0.5, fontSize: '0.8rem' }}>
                 Version {__APP_VERSION__}
             </div>
         </div>
