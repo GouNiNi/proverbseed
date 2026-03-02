@@ -203,6 +203,7 @@ export default function HomeView() {
             <div style={{
                 display: 'flex', flexDirection: 'column', flex: 1,
                 justifyContent: 'center', alignItems: 'center',
+                paddingTop: '80px',
                 paddingBottom: '220px'
             }}>
                 <div style={{
