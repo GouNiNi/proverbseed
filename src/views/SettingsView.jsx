@@ -41,6 +41,55 @@ export default function SettingsView() {
         if (key === 'darkMode') {
             window.dispatchEvent(new CustomEvent('themeChange', { detail: value }));
         }
+        if (key === 'notificationsEnabled') {
+            if (value) {
+                await enableNotifications(newSettings);
+            } else {
+                await disableNotifications();
+            }
+        }
+    };
+
+    const enableNotifications = async (currentSettings) => {
+        if (!('Notification' in window)) {
+            alert(language === 'en' ? 'Notifications are not supported by your browser.' : 'Les notifications ne sont pas supportées par votre navigateur.');
+            return;
+        }
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            alert(language === 'en' ? 'Notification permission denied. Please enable it in your browser settings.' : 'Permission refusée. Activez les notifications dans les paramètres de votre navigateur.');
+            const reverted = { ...currentSettings, notificationsEnabled: false };
+            setSettings(reverted);
+            await dbStore.setItem(dbOptions.SETTINGS, reverted);
+            return;
+        }
+        await registerPeriodicSync();
+    };
+
+    const disableNotifications = async () => {
+        if ('serviceWorker' in navigator) {
+            try {
+                const reg = await navigator.serviceWorker.ready;
+                if ('periodicSync' in reg) {
+                    await reg.periodicSync.unregister('daily-proverb');
+                }
+            } catch { /* ignore */ }
+        }
+    };
+
+    const registerPeriodicSync = async () => {
+        if (!('serviceWorker' in navigator)) return;
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            if ('periodicSync' in reg) {
+                const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+                if (status.state === 'granted') {
+                    await reg.periodicSync.register('daily-proverb', {
+                        minInterval: 12 * 60 * 60 * 1000, // 12h
+                    });
+                }
+            }
+        } catch { /* Periodic sync non disponible */ }
     };
 
     const toggleDay = async (dayValue) => {

@@ -7,6 +7,27 @@ import TutorialOverlay from './components/TutorialOverlay';
 import { LanguageContext } from './i18n/LanguageContext';
 import { dbStore, dbOptions } from './data/db';
 
+// Fallback : envoie une notification si l'heure est passée et qu'elle n'a pas encore été envoyée aujourd'hui
+async function checkDailyNotification(settings) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const now = new Date();
+    const days = settings.notificationDays ?? [0, 1, 2, 3, 4, 5, 6];
+    if (!days.includes(now.getDay())) return;
+    const [h, m] = (settings.notificationTime ?? '08:00').split(':').map(Number);
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
+    if (now < target) return; // Pas encore l'heure
+    const today = now.toDateString();
+    const lastNotif = await dbStore.getItem('last_notification_date');
+    if (lastNotif === today) return; // Déjà envoyée aujourd'hui
+    await dbStore.setItem('last_notification_date', today);
+    const lang = settings.language ?? 'fr';
+    const body = lang === 'en'
+        ? 'Your daily seed of wisdom awaits you.'
+        : 'Votre graine de sagesse du jour vous attend.';
+    new Notification('🌱 ProverbSeed', { body, icon: '/pwa-192x192.png' });
+}
+
 function App() {
     const [showSplash, setShowSplash] = useState(true);
     const [hidingSplash, setHidingSplash] = useState(false);
@@ -21,6 +42,7 @@ function App() {
                 if (settings.hasSeenTutorial === false) setShowTutorial(true);
                 if (settings.language) setLanguage(settings.language);
                 if (settings.darkMode) document.documentElement.setAttribute('data-theme', 'dark');
+                if (settings.notificationsEnabled) checkDailyNotification(settings);
             }
         });
 
