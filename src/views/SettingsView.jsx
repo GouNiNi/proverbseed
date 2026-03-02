@@ -202,6 +202,9 @@ export default function SettingsView() {
                     onChange={handleImport}
                 />
             </div>
+            <div style={{ marginTop: '40px', textAlign: 'center', opacity: 0.5, fontSize: '0.8rem' }}>
+                Version {__APP_VERSION__}
+            </div>
         </div>
     );
 }
