@@ -177,7 +177,7 @@ def make_text(verse_texts):
     """Concatenate verse texts. For multi-verse: prefix each verse number."""
     if len(verse_texts) == 1:
         return verse_texts[0][1]
-    return " ".join(f"{v} {t}" for v, t in verse_texts)
+    return " ".join(t for v, t in verse_texts)
 
 def get_verse_source(chapter):
     """Return the dict of verse_num -> text for a chapter."""

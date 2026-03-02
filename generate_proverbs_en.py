@@ -735,7 +735,7 @@ def make_reference_en(chapter, verses):
 def make_text(verse_dict, verses):
     if len(verses) == 1:
         return verse_dict[verses[0]]
-    return " ".join(f"{v} {verse_dict[v]}" for v in verses if v in verse_dict)
+    return " ".join(verse_dict[v] for v in verses if v in verse_dict)
 
 def main():
     with open("src/data/proverbs_fr.json", "r", encoding="utf-8") as f:
