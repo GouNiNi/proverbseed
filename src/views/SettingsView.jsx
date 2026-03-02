@@ -62,7 +62,7 @@ export default function SettingsView() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     id: pushId,
-                    notificationTime: currentSettings.notificationTime,
+                    notificationTime: localTimeToUTC(currentSettings.notificationTime),
                     notificationDays: currentSettings.notificationDays,
                     language: currentSettings.language,
                 }),
@@ -108,6 +108,13 @@ export default function SettingsView() {
         } catch { /* ignore */ }
     };
 
+    function localTimeToUTC(timeStr) {
+        const [h, m] = timeStr.split(':').map(Number);
+        const d = new Date();
+        d.setHours(h, m, 0, 0);
+        return d.getUTCHours().toString().padStart(2, '0') + ':' + d.getUTCMinutes().toString().padStart(2, '0');
+    }
+
     const subscribePush = async (currentSettings) => {
         try {
             const reg = await navigator.serviceWorker.ready;
@@ -125,7 +132,7 @@ export default function SettingsView() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     subscription: subscription.toJSON(),
-                    notificationTime: currentSettings.notificationTime,
+                    notificationTime: localTimeToUTC(currentSettings.notificationTime),
                     notificationDays: currentSettings.notificationDays,
                     language: currentSettings.language,
                 }),
@@ -134,7 +141,6 @@ export default function SettingsView() {
             await dbStore.setItem('push_subscription_id', id);
         } catch (err) {
             console.error('Push subscription error:', err);
-            alert('Erreur souscription push: ' + err.name + ': ' + err.message);
         }
     };
 
