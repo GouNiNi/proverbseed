@@ -328,6 +328,7 @@ export default function SettingsView() {
                             <span>{t('settings', 'heureRappel')}</span>
                             <input
                                 type="time"
+                                step={300}
                                 value={settings.notificationTime}
                                 onChange={(e) => updateSetting('notificationTime', e.target.value)}
                                 style={{ width: 'auto', padding: '6px' }}
