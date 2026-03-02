@@ -4,13 +4,13 @@ import { Heart, Check, Hash, Edit3, ArrowRight } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
 
-// Returns font size based on number of verses in the unit
-function getProverbFontSize(verseCount) {
-    if (verseCount <= 1) return '1.9rem';
-    if (verseCount <= 2) return '1.55rem';
-    if (verseCount <= 3) return '1.3rem';
-    if (verseCount <= 5) return '1.1rem';
-    return '0.95rem';
+// Returns font size based on character length of the proverb text (+15% vs original)
+function getProverbFontSize(textLength) {
+    if (textLength < 120) return '2.2rem';
+    if (textLength < 200) return '1.8rem';
+    if (textLength < 320) return '1.5rem';
+    if (textLength < 480) return '1.25rem';
+    return '1.1rem';
 }
 
 export default function HomeView() {
@@ -175,9 +175,8 @@ export default function HomeView() {
 
     if (loading) return null;
 
-    const verseCount = proverb?.verses?.length ?? 1;
-    const isMultiVerse = verseCount > 1;
-    const fontSize = getProverbFontSize(verseCount);
+    const isMultiVerse = (proverb?.verses?.length ?? 1) > 1;
+    const fontSize = getProverbFontSize(proverb?.text?.length ?? 0);
 
     if (!proverb) return (
         <div style={{ textAlign: 'center', marginTop: '50px', opacity: isFading ? 0 : 1, transition: 'opacity 0.5s ease' }}>
