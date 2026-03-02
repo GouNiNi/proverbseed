@@ -134,6 +134,7 @@ export default function SettingsView() {
             await dbStore.setItem('push_subscription_id', id);
         } catch (err) {
             console.error('Push subscription error:', err);
+            alert('Erreur souscription push: ' + err.name + ': ' + err.message);
         }
     };
 
