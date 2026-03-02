@@ -40,8 +40,12 @@ export default function TutorialOverlay({ onClose }) {
                 {step === 1 && (
                     <div className="tutorial-content fade-enter fade-enter-active">
                         <h2 className="title-font" style={{ fontSize: '2.5rem', textAlign: 'center', marginBottom: '8px' }}>Installer l'app</h2>
-                        <p style={{ textAlign: 'center', color: 'var(--color-supporting)', marginBottom: '32px' }}>
+                        <p style={{ textAlign: 'center', color: 'var(--color-supporting)', marginBottom: '16px' }}>
                             (sur mon écran d'accueil)
+                        </p>
+
+                        <p style={{ textAlign: 'center', marginBottom: '24px', fontSize: '0.9rem', padding: '0 10px' }}>
+                            Installez ProverbSeed pour l'utiliser hors-ligne et y accéder rapidement.
                         </p>
 
                         <div className="tutorial-illustration">
@@ -76,9 +80,6 @@ export default function TutorialOverlay({ onClose }) {
                             </div>
                         </div>
 
-                        <p style={{ textAlign: 'center', marginTop: '32px', fontSize: '0.9rem' }}>
-                            Installez ProverbSeed pour l'utiliser hors-ligne et y accéder rapidement.
-                        </p>
                     </div>
                 )}
 
