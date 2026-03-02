@@ -1,5 +1,17 @@
 import localforage from 'localforage';
-import proverbsData from './proverbs.json';
+import proverbsFr from './proverbs_fr.json';
+
+let proverbsEn = null;
+const loadEnglish = async () => {
+    if (!proverbsEn) {
+        try {
+            proverbsEn = (await import('./proverbs_en.json')).default;
+        } catch {
+            proverbsEn = proverbsFr; // fallback
+        }
+    }
+    return proverbsEn;
+};
 
 // Initialize the stores
 const store = localforage.createInstance({
@@ -16,7 +28,9 @@ export const dbOptions = {
 };
 
 const defaultSettings = {
+    language: 'fr',
     categorizationAid: false,
+    singleVerseOnly: false,
     notificationsEnabled: false,
     notificationTime: '08:00',
     notificationDays: [1, 2, 3, 4, 5, 6, 0], // 0 is Sunday
@@ -31,58 +45,57 @@ const defaultStats = {
 
 // Seed or initialize default values if they don't exist
 export const initDB = async () => {
-    console.log("[db.js] initDB start...");
     try {
-        const currentThemes = await store.getItem(dbOptions.USER_THEMES);
-        console.log("[db.js] item fetched: USER_THEMES", currentThemes);
-        if (!currentThemes) {
+        if (!await store.getItem(dbOptions.USER_THEMES))
             await store.setItem(dbOptions.USER_THEMES, []);
-        }
 
         const currentSettings = await store.getItem(dbOptions.SETTINGS);
-        console.log("[db.js] item fetched: SETTINGS", currentSettings);
         if (!currentSettings) {
             await store.setItem(dbOptions.SETTINGS, defaultSettings);
+        } else {
+            // Migrate older settings: ensure new keys exist
+            const merged = { ...defaultSettings, ...currentSettings };
+            await store.setItem(dbOptions.SETTINGS, merged);
         }
 
-        const currentStats = await store.getItem(dbOptions.USER_STATS);
-        console.log("[db.js] item fetched: USER_STATS", currentStats);
-        if (!currentStats) {
+        if (!await store.getItem(dbOptions.USER_STATS))
             await store.setItem(dbOptions.USER_STATS, defaultStats);
-        }
-
-        // Ensure arrays/objects exist
-        console.log("[db.js] checking CATEGORIZED_PROVERBS...");
-        if (!await store.getItem(dbOptions.CATEGORIZED_PROVERBS)) await store.setItem(dbOptions.CATEGORIZED_PROVERBS, {});
-        console.log("[db.js] checking FAVORITES...");
-        if (!await store.getItem(dbOptions.FAVORITES)) await store.setItem(dbOptions.FAVORITES, []);
-        console.log("[db.js] checking MEDITATION_NOTES...");
-        if (!await store.getItem(dbOptions.MEDITATION_NOTES)) await store.setItem(dbOptions.MEDITATION_NOTES, {});
-
-        console.log("[db.js] initDB complete!");
+        if (!await store.getItem(dbOptions.CATEGORIZED_PROVERBS))
+            await store.setItem(dbOptions.CATEGORIZED_PROVERBS, {});
+        if (!await store.getItem(dbOptions.FAVORITES))
+            await store.setItem(dbOptions.FAVORITES, []);
+        if (!await store.getItem(dbOptions.MEDITATION_NOTES))
+            await store.setItem(dbOptions.MEDITATION_NOTES, {});
     } catch (error) {
         console.error("[db.js] error inside initDB:", error);
         throw error;
     }
 };
 
-export const getProverbById = (id) => {
-    return proverbsData.find(p => p.id === id);
+export const getAllProverbs = async (language = 'fr') => {
+    if (language === 'en') return await loadEnglish();
+    return proverbsFr;
 };
 
-export const getRandomUncategorizedProverb = async () => {
+export const getProverbById = async (id, language = 'fr') => {
+    const data = await getAllProverbs(language);
+    return data.find(p => p.id === id) || null;
+};
+
+export const getRandomUncategorizedProverb = async ({ language = 'fr', singleVerseOnly = false } = {}) => {
+    const data = await getAllProverbs(language);
     const categorized = await store.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
     const categorizedIds = Object.keys(categorized);
 
-    const uncategorized = proverbsData.filter(p => !categorizedIds.includes(p.id));
+    let pool = data.filter(p => !categorizedIds.includes(p.id));
 
-    if (uncategorized.length === 0) {
-        return null; // All done!
+    if (singleVerseOnly) {
+        pool = pool.filter(p => p.verses && p.verses.length === 1);
     }
 
-    const randomIndex = Math.floor(Math.random() * uncategorized.length);
-    return uncategorized[randomIndex];
+    if (pool.length === 0) return null;
+
+    return pool[Math.floor(Math.random() * pool.length)];
 };
 
 export const dbStore = store;
-export const allProverbs = proverbsData;
