@@ -49,12 +49,12 @@ export default function TutorialOverlay({ onClose }) {
                                 <h3>Sur iOS (Safari)</h3>
                                 <div className="icon-row">
                                     <div className="icon-step">
-                                        <Share size={28} className="bouncing-icon" />
+                                        <Share size={28} />
                                         <span>Partager</span>
                                     </div>
                                     <div className="arrow">→</div>
                                     <div className="icon-step">
-                                        <PlusSquare size={28} className="bouncing-icon" style={{ animationDelay: '0.2s' }} />
+                                        <PlusSquare size={28} />
                                         <span>Sur l'écran d'accueil</span>
                                     </div>
                                 </div>
@@ -64,12 +64,12 @@ export default function TutorialOverlay({ onClose }) {
                                 <h3>Sur Android (Chrome)</h3>
                                 <div className="icon-row">
                                     <div className="icon-step">
-                                        <MoreVertical size={28} className="bouncing-icon" />
+                                        <MoreVertical size={28} />
                                         <span>Menu</span>
                                     </div>
                                     <div className="arrow">→</div>
                                     <div className="icon-step">
-                                        <Download size={28} className="bouncing-icon" style={{ animationDelay: '0.2s' }} />
+                                        <Download size={28} />
                                         <span>Installer l'app</span>
                                     </div>
                                 </div>
