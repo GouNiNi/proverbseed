@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { getRandomUncategorizedProverb, dbOptions, dbStore, getProverbById } from '../data/db';
+import { getRandomUncategorizedProverb, getAllProverbs, dbOptions, dbStore, getProverbById } from '../data/db';
 import { Heart, Check, Hash, Edit3, ArrowRight } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
@@ -13,7 +13,7 @@ function getProverbFontSize(textLength) {
     return '1.1rem';
 }
 
-export default function HomeView() {
+export default function HomeView({ pendingEditId = null, onClearPendingEdit = null }) {
     const language = useContext(LanguageContext);
     const t = useT();
 
@@ -21,7 +21,8 @@ export default function HomeView() {
     const [loading, setLoading] = useState(true);
     const [isFading, setIsFading] = useState(false);
     const [showContent, setShowContent] = useState(false);
-    const [settings, setSettings] = useState({ categorizationAid: false, singleVerseOnly: false });
+    const [settings, setSettings] = useState({ categorizationAid: false, singleVerseOnly: false, sequentialMode: false, revisionMode: false });
+    const [progressStats, setProgressStats] = useState({ done: 0, total: 0 });
 
     const [isFavorite, setIsFavorite] = useState(false);
     const [currentThemes, setCurrentThemes] = useState([]);
@@ -57,16 +58,24 @@ export default function HomeView() {
             // Reset navigation history when language changes
             setHistory([]);
             setHistoryIndex(-1);
-            await fetchNewProverb(s);
+            if (pendingEditId) {
+                const p = await getProverbById(pendingEditId, language);
+                if (onClearPendingEdit) onClearPendingEdit();
+                await applyProverbState(p);
+            } else {
+                await fetchNewProverb(s);
+            }
         };
         init();
-    }, [language]);
+    }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const applyProverbState = async (p) => {
         if (!p) { setProverb(null); setLoading(false); return; }
         const favStore  = await dbStore.getItem(dbOptions.FAVORITES) || [];
         const catStore  = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
         const noteStore = await dbStore.getItem(dbOptions.MEDITATION_NOTES) || {};
+        const allData   = await getAllProverbs(language);
+        setProgressStats({ done: Object.keys(catStore).length, total: allData.length });
         setProverb(p);
         setIsFavorite(favStore.includes(p.id));
         setCurrentThemes(catStore[p.id] || []);
@@ -86,6 +95,8 @@ export default function HomeView() {
                 const p = await getRandomUncategorizedProverb({
                     language,
                     singleVerseOnly: s?.singleVerseOnly || false,
+                    sequential: s?.sequentialMode || false,
+                    revisionMode: s?.revisionMode || false,
                 });
                 if (p) {
                     setHistory(prev => [...prev, p]);
@@ -251,6 +262,15 @@ export default function HomeView() {
             {/* Anchored Bottom Blocks */}
             <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, paddingBottom: '24px', zIndex: 10 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 24px', marginBottom: '10px' }}>
+                    {/* Progress Counter */}
+                    {progressStats.total > 0 && (
+                        <div style={{
+                            textAlign: 'right', fontSize: '0.7rem',
+                            color: 'var(--color-supporting)', opacity: 0.75, letterSpacing: '1px'
+                        }}>
+                            {progressStats.done} / {progressStats.total}
+                        </div>
+                    )}
                     {/* Current Tags */}
                     <div style={{
                         display: 'flex', flexWrap: 'wrap', gap: '8px',

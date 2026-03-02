@@ -13,12 +13,14 @@ function App() {
     const [currentView, setCurrentView] = useState('home'); // home, library, settings
     const [showTutorial, setShowTutorial] = useState(false);
     const [language, setLanguage] = useState('fr');
+    const [pendingEditId, setPendingEditId] = useState(null);
 
     useEffect(() => {
         dbStore.getItem(dbOptions.SETTINGS).then(settings => {
             if (settings) {
                 if (settings.hasSeenTutorial === false) setShowTutorial(true);
                 if (settings.language) setLanguage(settings.language);
+                if (settings.darkMode) document.documentElement.setAttribute('data-theme', 'dark');
             }
         });
 
@@ -28,9 +30,16 @@ function App() {
         const handleLanguageChange = (e) => setLanguage(e.detail);
         window.addEventListener('languageChange', handleLanguageChange);
 
+        const handleThemeChange = (e) => {
+            if (e.detail) document.documentElement.setAttribute('data-theme', 'dark');
+            else document.documentElement.removeAttribute('data-theme');
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+
         return () => {
             window.removeEventListener('showTutorial', handleShowTutorial);
             window.removeEventListener('languageChange', handleLanguageChange);
+            window.removeEventListener('themeChange', handleThemeChange);
         };
     }, []);
 
@@ -42,12 +51,17 @@ function App() {
         return () => clearTimeout(hideTimer);
     }, []);
 
+    const handleEditProverb = (id) => {
+        setPendingEditId(id);
+        setCurrentView('home');
+    };
+
     const renderView = () => {
         switch (currentView) {
-            case 'home':     return <HomeView />;
-            case 'library':  return <LibraryView />;
+            case 'home':     return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} />;
+            case 'library':  return <LibraryView onEditProverb={handleEditProverb} />;
             case 'settings': return <SettingsView />;
-            default:         return <HomeView />;
+            default:         return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} />;
         }
     };
 

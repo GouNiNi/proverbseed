@@ -31,6 +31,9 @@ const defaultSettings = {
     language: 'fr',
     categorizationAid: false,
     singleVerseOnly: false,
+    sequentialMode: false,
+    revisionMode: false,
+    darkMode: false,
     notificationsEnabled: false,
     notificationTime: '08:00',
     notificationDays: [1, 2, 3, 4, 5, 6, 0], // 0 is Sunday
@@ -82,12 +85,12 @@ export const getProverbById = async (id, language = 'fr') => {
     return data.find(p => p.id === id) || null;
 };
 
-export const getRandomUncategorizedProverb = async ({ language = 'fr', singleVerseOnly = false } = {}) => {
+export const getRandomUncategorizedProverb = async ({ language = 'fr', singleVerseOnly = false, sequential = false, revisionMode = false } = {}) => {
     const data = await getAllProverbs(language);
     const categorized = await store.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
     const categorizedIds = Object.keys(categorized);
 
-    let pool = data.filter(p => !categorizedIds.includes(p.id));
+    let pool = revisionMode ? [...data] : data.filter(p => !categorizedIds.includes(p.id));
 
     if (singleVerseOnly) {
         pool = pool.filter(p => p.verses && p.verses.length === 1);
@@ -95,6 +98,7 @@ export const getRandomUncategorizedProverb = async ({ language = 'fr', singleVer
 
     if (pool.length === 0) return null;
 
+    if (sequential) return pool[0];
     return pool[Math.floor(Math.random() * pool.length)];
 };
 

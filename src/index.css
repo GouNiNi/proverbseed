@@ -23,6 +23,51 @@
   --transition-fast: 300ms ease;
 }
 
+/* ── Dark mode ───────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-primary: #7A9B62;
+  --color-secondary: #C8A882;
+  --color-supporting: #8A7563;
+  --color-background: #1C1813;
+  --color-card-bg: #272018;
+  --color-text: #EAE0D5;
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] body {
+  background-image: none;
+}
+
+[data-theme="dark"] .nav-overlay {
+  background-color: rgba(28, 24, 19, 0.75);
+}
+
+[data-theme="dark"] .nav-icon-bg {
+  background: rgba(50, 40, 30, 0.65);
+  border-color: rgba(80, 65, 50, 0.5);
+}
+
+[data-theme="dark"] .tutorial-overlay {
+  background-color: rgba(8, 6, 4, 0.92);
+}
+
+[data-theme="dark"] .tutorial-modal {
+  background-color: var(--color-background);
+}
+
+[data-theme="dark"] .tutorial-close-btn {
+  background: rgba(50, 40, 30, 0.7);
+}
+
+[data-theme="dark"] .tutorial-close-btn:hover {
+  background: rgba(65, 52, 38, 0.9);
+}
+
+[data-theme="dark"] .tutorial-illustration {
+  background-color: var(--color-card-bg);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

@@ -13,6 +13,9 @@ export default function SettingsView() {
         language: 'fr',
         categorizationAid: false,
         singleVerseOnly: false,
+        sequentialMode: false,
+        revisionMode: false,
+        darkMode: false,
         notificationsEnabled: false,
         notificationTime: '08:00',
         notificationDays: [1, 2, 3, 4, 5, 6, 0],
@@ -34,6 +37,9 @@ export default function SettingsView() {
         await dbStore.setItem(dbOptions.SETTINGS, newSettings);
         if (key === 'language') {
             window.dispatchEvent(new CustomEvent('languageChange', { detail: value }));
+        }
+        if (key === 'darkMode') {
+            window.dispatchEvent(new CustomEvent('themeChange', { detail: value }));
         }
     };
 
@@ -155,6 +161,45 @@ export default function SettingsView() {
                         style={{ width: 'auto' }}
                         checked={settings.singleVerseOnly}
                         onChange={(e) => updateSetting('singleVerseOnly', e.target.checked)}
+                    />
+                </div>
+
+                {/* Sequential Mode */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span>{t('settings', 'sequentialMode')}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-supporting)' }}>{t('settings', 'sequentialModeDesc')}</span>
+                    </div>
+                    <input
+                        type="checkbox"
+                        style={{ width: 'auto' }}
+                        checked={settings.sequentialMode}
+                        onChange={(e) => updateSetting('sequentialMode', e.target.checked)}
+                    />
+                </div>
+
+                {/* Revision Mode */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span>{t('settings', 'revisionMode')}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-supporting)' }}>{t('settings', 'revisionModeDesc')}</span>
+                    </div>
+                    <input
+                        type="checkbox"
+                        style={{ width: 'auto' }}
+                        checked={settings.revisionMode}
+                        onChange={(e) => updateSetting('revisionMode', e.target.checked)}
+                    />
+                </div>
+
+                {/* Dark Mode */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>{t('settings', 'darkMode')}</span>
+                    <input
+                        type="checkbox"
+                        style={{ width: 'auto' }}
+                        checked={settings.darkMode}
+                        onChange={(e) => updateSetting('darkMode', e.target.checked)}
                     />
                 </div>
 
