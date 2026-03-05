@@ -71,10 +71,10 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
 
     const applyProverbState = async (p) => {
         if (!p) { setProverb(null); setLoading(false); return; }
-        const favStore  = await dbStore.getItem(dbOptions.FAVORITES) || [];
-        const catStore  = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
+        const favStore = await dbStore.getItem(dbOptions.FAVORITES) || [];
+        const catStore = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
         const noteStore = await dbStore.getItem(dbOptions.MEDITATION_NOTES) || {};
-        const allData   = await getAllProverbs(language);
+        const allData = await getAllProverbs(language);
         setProgressStats({ done: Object.keys(catStore).length, total: allData.length });
         setProverb(p);
         setIsFavorite(favStore.includes(p.id));
@@ -85,6 +85,46 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
         setLoading(false);
         setIsFading(false);
         setTimeout(() => setShowContent(true), 50);
+    };
+
+    const persistThemes = async (themes) => {
+        if (!proverb) return;
+        try {
+            const catStore = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
+            if (themes.length > 0) {
+                catStore[proverb.id] = themes;
+            } else {
+                delete catStore[proverb.id];
+            }
+            await dbStore.setItem(dbOptions.CATEGORIZED_PROVERBS, catStore);
+
+            const allThm = await dbStore.getItem(dbOptions.USER_THEMES) || [];
+            const newAllThm = [...new Set([...allThm, ...themes])];
+            await dbStore.setItem(dbOptions.USER_THEMES, newAllThm);
+            setAllUserThemes(newAllThm);
+
+            const allData = await getAllProverbs(language);
+            setProgressStats({ done: Object.keys(catStore).length, total: allData.length });
+        } catch (err) {
+            console.error("Error persisting themes:", err);
+        }
+    };
+
+    const toggleFavorite = async () => {
+        if (!proverb) return;
+        const newFav = !isFavorite;
+        setIsFavorite(newFav);
+        try {
+            let favStore = await dbStore.getItem(dbOptions.FAVORITES) || [];
+            if (newFav && !favStore.includes(proverb.id)) {
+                favStore.push(proverb.id);
+            } else if (!newFav) {
+                favStore = favStore.filter(id => id !== proverb.id);
+            }
+            await dbStore.setItem(dbOptions.FAVORITES, favStore);
+        } catch (err) {
+            console.error("Error persisting favorite:", err);
+        }
     };
 
     const fetchNewProverb = async (settingsOverride) => {
@@ -137,15 +177,23 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
         }, 500);
     };
 
-    const handleAddThemeLocal = (e) => {
+    const handleAddThemeLocal = async (e) => {
         if (e.key === 'Enter' || e.type === 'click') {
             const val = themeInput.trim();
-            if (val && !currentThemes.includes(val)) setCurrentThemes([...currentThemes, val]);
+            if (val && !currentThemes.includes(val)) {
+                const newThemes = [...currentThemes, val];
+                setCurrentThemes(newThemes);
+                await persistThemes(newThemes);
+            }
             setThemeInput('');
         }
     };
 
-    const handleRemoveTheme = (theme) => setCurrentThemes(currentThemes.filter(t => t !== theme));
+    const handleRemoveTheme = async (theme) => {
+        const newThemes = currentThemes.filter(t => t !== theme);
+        setCurrentThemes(newThemes);
+        await persistThemes(newThemes);
+    };
 
     const handleSave = async () => {
         if (!proverb) return;
@@ -155,24 +203,11 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
             finalThemes.push(pendingInput);
             setCurrentThemes(finalThemes);
             setThemeInput('');
+            await persistThemes(finalThemes);
         }
         try {
-            if (finalThemes.length > 0) {
-                const catStore = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
-                catStore[proverb.id] = finalThemes;
-                await dbStore.setItem(dbOptions.CATEGORIZED_PROVERBS, catStore);
-                const allThm = await dbStore.getItem(dbOptions.USER_THEMES) || [];
-                const newThm = [...new Set([...allThm, ...finalThemes])];
-                await dbStore.setItem(dbOptions.USER_THEMES, newThm);
-                setAllUserThemes(newThm);
-            }
-            let favStore = await dbStore.getItem(dbOptions.FAVORITES) || [];
-            if (isFavorite && !favStore.includes(proverb.id)) {
-                favStore.push(proverb.id);
-            } else if (!isFavorite) {
-                favStore = favStore.filter(id => id !== proverb.id);
-            }
-            await dbStore.setItem(dbOptions.FAVORITES, favStore);
+            // Favorite is already handled by toggleFavorite, but we ensure it's synced if needed
+            // Actually handleSave is the "final validation" for the note and moving forward
             const noteStore = await dbStore.getItem(dbOptions.MEDITATION_NOTES) || {};
             if (note.trim()) { noteStore[proverb.id] = note.trim(); }
             else { delete noteStore[proverb.id]; }
@@ -239,7 +274,7 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                             {proverb.reference}
                         </span>
                         <button
-                            onClick={() => setIsFavorite(!isFavorite)}
+                            onClick={toggleFavorite}
                             style={{ color: isFavorite ? '#d32f2f' : 'var(--color-supporting)', padding: '5px' }}
                             aria-label="Toggle Favorite"
                         >
@@ -319,7 +354,12 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                                     .filter(th => th.toLowerCase().includes(themeInput.trim().toLowerCase()) && !currentThemes.includes(th))
                                     .slice(0, 5)
                                     .map((th, i) => (
-                                        <span key={`auto-${i}`} onClick={() => { setCurrentThemes([...currentThemes, th]); setThemeInput(''); }}
+                                        <span key={`auto-${i}`} onClick={() => {
+                                            const newThemes = [...currentThemes, th];
+                                            setCurrentThemes(newThemes);
+                                            setThemeInput('');
+                                            persistThemes(newThemes);
+                                        }}
                                             style={{ cursor: 'pointer', border: '1px dotted var(--color-supporting)', padding: '2px 8px', borderRadius: '12px' }}>
                                             + {th}
                                         </span>
@@ -331,7 +371,13 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-supporting)', display: 'flex', flexWrap: 'wrap', gap: '8px', opacity: 0.8 }}>
                                 {t('home', 'suggestions')}
                                 {proverb.suggestions.map((sugg, i) => (
-                                    <span key={i} onClick={() => { if (!currentThemes.includes(sugg)) setCurrentThemes([...currentThemes, sugg]); }}
+                                    <span key={i} onClick={() => {
+                                        if (!currentThemes.includes(sugg)) {
+                                            const newThemes = [...currentThemes, sugg];
+                                            setCurrentThemes(newThemes);
+                                            persistThemes(newThemes);
+                                        }
+                                    }}
                                         style={{ cursor: 'pointer', borderBottom: '1px dotted var(--color-supporting)', paddingBottom: '1px' }}>
                                         + {sugg}
                                     </span>
