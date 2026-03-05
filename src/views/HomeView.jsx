@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { getRandomUncategorizedProverb, getAllProverbs, dbOptions, dbStore, getProverbById } from '../data/db';
-import { Heart, Check, Hash, Edit3, ArrowRight } from 'lucide-react';
+import { Heart, Check, Hash, Edit3, ArrowRight, Plus, X } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
 
@@ -31,6 +31,10 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
     const [showNote, setShowNote] = useState(false);
 
     const [allUserThemes, setAllUserThemes] = useState([]);
+
+    // Modal state
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [tempModalThemes, setTempModalThemes] = useState([]);
 
     const [history, setHistory] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
@@ -218,6 +222,25 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
         }
     };
 
+    const openModal = () => {
+        setTempModalThemes([...currentThemes]);
+        setIsModalOpen(true);
+    };
+
+    const toggleModalTheme = (theme) => {
+        if (tempModalThemes.includes(theme)) {
+            setTempModalThemes(tempModalThemes.filter(t => t !== theme));
+        } else {
+            setTempModalThemes([...tempModalThemes, theme]);
+        }
+    };
+
+    const saveModalThemes = async () => {
+        setCurrentThemes(tempModalThemes);
+        await persistThemes(tempModalThemes);
+        setIsModalOpen(false);
+    };
+
     if (loading) return null;
 
     const isMultiVerse = (proverb?.verses?.length ?? 1) > 1;
@@ -333,11 +356,17 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                                 onChange={e => setThemeInput(e.target.value)}
                                 onKeyDown={handleAddThemeLocal}
                                 style={{
-                                    paddingLeft: '34px', background: 'transparent',
+                                    paddingLeft: '34px', paddingRight: '34px', background: 'transparent',
                                     border: 'none', borderBottom: '1px solid var(--color-supporting)',
                                     borderRadius: 0, fontSize: '0.9rem', color: 'var(--color-secondary)'
                                 }}
                             />
+                            <button
+                                onClick={openModal}
+                                style={{ position: 'absolute', right: '12px', color: 'var(--color-supporting)', padding: '4px' }}
+                            >
+                                <Plus size={16} />
+                            </button>
                         </div>
                     </div>
 
@@ -432,6 +461,60 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                     </button>
                 </div>
             </div>
+
+            {/* Themes Modal */}
+            {isModalOpen && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100,
+                    display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
+                }}>
+                    <div className="card" style={{ width: '100%', maxWidth: '400px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h3 className="title-font" style={{ margin: 0, fontSize: '1.5rem', color: 'var(--color-text)' }}>Étiquettes</h3>
+                            <button onClick={() => setIsModalOpen(false)} style={{ color: 'var(--color-supporting)', padding: '4px' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div style={{ flex: 1, overflowY: 'auto', marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {allUserThemes.length === 0 ? (
+                                <p style={{ color: 'var(--color-supporting)', fontSize: '0.9rem', textAlign: 'center', width: '100%' }}>
+                                    Aucune étiquette créée pour le moment.
+                                </p>
+                            ) : (
+                                allUserThemes.map(theme => {
+                                    const isSelected = tempModalThemes.includes(theme);
+                                    return (
+                                        <button
+                                            key={theme}
+                                            onClick={() => toggleModalTheme(theme)}
+                                            style={{
+                                                backgroundColor: isSelected ? 'rgba(163, 177, 138, 0.4)' : 'transparent',
+                                                color: isSelected ? 'var(--color-secondary)' : 'var(--color-text)',
+                                                border: `1px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-supporting)'}`,
+                                                padding: '6px 12px',
+                                                borderRadius: '20px',
+                                                fontSize: '0.9rem',
+                                                transition: 'all 0.2s',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px'
+                                            }}
+                                        >
+                                            {theme} {isSelected && <Check size={14} />}
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+
+                        <button className="btn-primary" onClick={saveModalThemes} style={{ width: '100%', justifyContent: 'center' }}>
+                            Valider
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
