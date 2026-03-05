@@ -13,8 +13,7 @@ export default function SettingsView() {
         language: 'fr',
         categorizationAid: false,
         singleVerseOnly: false,
-        sequentialMode: false,
-        revisionMode: false,
+        randomMode: false,
         darkMode: false,
         notificationsEnabled: false,
         notificationTime: '08:00',
@@ -162,11 +161,11 @@ export default function SettingsView() {
     const handleExport = async () => {
         try {
             const themes = await dbStore.getItem(dbOptions.USER_THEMES) || [];
-            const cat    = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
-            const fav    = await dbStore.getItem(dbOptions.FAVORITES) || [];
-            const notes  = await dbStore.getItem(dbOptions.MEDITATION_NOTES) || {};
-            const stats  = await dbStore.getItem(dbOptions.USER_STATS) || {};
-            const set    = await dbStore.getItem(dbOptions.SETTINGS) || {};
+            const cat = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
+            const fav = await dbStore.getItem(dbOptions.FAVORITES) || [];
+            const notes = await dbStore.getItem(dbOptions.MEDITATION_NOTES) || {};
+            const stats = await dbStore.getItem(dbOptions.USER_STATS) || {};
+            const set = await dbStore.getItem(dbOptions.SETTINGS) || {};
 
             const exportData = {
                 version: "1.1",
@@ -272,31 +271,17 @@ export default function SettingsView() {
                     />
                 </div>
 
-                {/* Sequential Mode */}
+                {/* Random Mode */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <span>{t('settings', 'sequentialMode')}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-supporting)' }}>{t('settings', 'sequentialModeDesc')}</span>
+                        <span>{t('settings', 'randomMode')}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-supporting)' }}>{t('settings', 'randomModeDesc')}</span>
                     </div>
                     <input
                         type="checkbox"
                         style={{ width: 'auto' }}
-                        checked={settings.sequentialMode}
-                        onChange={(e) => updateSetting('sequentialMode', e.target.checked)}
-                    />
-                </div>
-
-                {/* Revision Mode */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <span>{t('settings', 'revisionMode')}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-supporting)' }}>{t('settings', 'revisionModeDesc')}</span>
-                    </div>
-                    <input
-                        type="checkbox"
-                        style={{ width: 'auto' }}
-                        checked={settings.revisionMode}
-                        onChange={(e) => updateSetting('revisionMode', e.target.checked)}
+                        checked={settings.randomMode}
+                        onChange={(e) => updateSetting('randomMode', e.target.checked)}
                     />
                 </div>
 

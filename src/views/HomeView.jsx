@@ -135,8 +135,7 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                 const p = await getRandomUncategorizedProverb({
                     language,
                     singleVerseOnly: s?.singleVerseOnly || false,
-                    sequential: s?.sequentialMode || false,
-                    revisionMode: s?.revisionMode || false,
+                    randomMode: s?.randomMode || false,
                 });
                 if (p) {
                     setHistory(prev => [...prev, p]);
