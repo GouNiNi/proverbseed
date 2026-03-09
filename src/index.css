@@ -228,6 +228,12 @@ textarea:focus {
   color: var(--color-primary);
 }
 
+/* Hide floating nav when keyboard is open */
+body.keyboard-open .floating-nav-btn,
+body.keyboard-open .nav-expanded-controls {
+  display: none;
+}
+
 /* Floating Navigation */
 .floating-nav-btn {
   position: fixed;

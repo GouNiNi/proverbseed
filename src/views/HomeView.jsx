@@ -31,6 +31,16 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
     const [showNote, setShowNote] = useState(false);
 
     const [allUserThemes, setAllUserThemes] = useState([]);
+    const [isInputFocused, setIsInputFocused] = useState(false);
+
+    useEffect(() => {
+        if (isInputFocused) {
+            document.body.classList.add('keyboard-open');
+        } else {
+            document.body.classList.remove('keyboard-open');
+        }
+        return () => document.body.classList.remove('keyboard-open');
+    }, [isInputFocused]);
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -258,21 +268,31 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
-            style={{ display: 'flex', flexDirection: 'column', minHeight: '85vh', position: 'relative' }}
+            style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                minHeight: isInputFocused ? 'auto' : '85vh', 
+                position: 'relative',
+                paddingBottom: isInputFocused ? '40px' : '0'
+            }}
         >
             {/* Stable Header */}
-            <div style={{ textAlign: 'center', paddingTop: '20px', paddingBottom: '10px' }}>
-                <h2 className="title-font" style={{ fontSize: '2rem', color: 'var(--color-supporting)', opacity: 0.6, letterSpacing: '2px' }}>
-                    {t('home', 'graineDuJour')}
-                </h2>
-            </div>
+            {!isInputFocused && (
+                <div style={{ textAlign: 'center', paddingTop: '20px', paddingBottom: '10px' }}>
+                    <h2 className="title-font" style={{ fontSize: '2rem', color: 'var(--color-supporting)', opacity: 0.6, letterSpacing: '2px' }}>
+                        {t('home', 'graineDuJour')}
+                    </h2>
+                </div>
+            )}
 
             {/* Proverb Content Area */}
             <div style={{
-                display: 'flex', flexDirection: 'column', flex: 1,
-                justifyContent: 'center', alignItems: 'center',
-                paddingTop: '80px',
-                paddingBottom: '220px'
+                display: 'flex', flexDirection: 'column', 
+                flex: isInputFocused ? 'none' : 1,
+                justifyContent: isInputFocused ? 'flex-start' : 'center', 
+                alignItems: 'center',
+                paddingTop: isInputFocused ? '20px' : '80px',
+                paddingBottom: isInputFocused ? '40px' : '220px'
             }}>
                 <div style={{
                     position: 'relative', width: '100%', textAlign: 'center',
@@ -317,10 +337,15 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
             </div>
 
             {/* Anchored Bottom Blocks */}
-            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, paddingBottom: '24px', zIndex: 10 }}>
+            <div style={{ 
+                position: isInputFocused ? 'relative' : 'fixed', 
+                bottom: 0, left: 0, right: 0, 
+                paddingBottom: '24px', 
+                zIndex: 10 
+            }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 24px', marginBottom: '10px' }}>
                     {/* Progress Counter */}
-                    {progressStats.total > 0 && (
+                    {progressStats.total > 0 && !isInputFocused && (
                         <div style={{
                             textAlign: 'right', fontSize: '0.7rem',
                             color: 'var(--color-supporting)', opacity: 0.75, letterSpacing: '1px'
@@ -355,6 +380,8 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                                 value={themeInput}
                                 onChange={e => setThemeInput(e.target.value)}
                                 onKeyDown={handleAddThemeLocal}
+                                onFocus={() => setIsInputFocused(true)}
+                                onBlur={() => setIsInputFocused(false)}
                                 style={{
                                     paddingLeft: '34px', paddingRight: '34px', background: 'transparent',
                                     border: 'none', borderBottom: '1px solid var(--color-supporting)',
@@ -423,6 +450,8 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                                     placeholder={t('home', 'notePlaceholder')}
                                     value={note}
                                     onChange={e => setNote(e.target.value)}
+                                    onFocus={() => setIsInputFocused(true)}
+                                    onBlur={() => setIsInputFocused(false)}
                                     style={{
                                         background: 'transparent', border: '1px solid var(--color-supporting)',
                                         borderRadius: 'var(--radius-sm)', fontSize: '0.9rem', color: 'var(--color-secondary)',
