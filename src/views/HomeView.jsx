@@ -339,11 +339,18 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
             {/* Anchored Bottom Blocks */}
             <div style={{ 
                 position: isInputFocused ? 'relative' : 'fixed', 
-                bottom: 0, left: 0, right: 0, 
+                bottom: 0, 
+                left: isInputFocused ? 'auto' : 0, 
+                right: isInputFocused ? 'auto' : 0, 
+                width: isInputFocused ? '100%' : 'auto',
                 paddingBottom: '24px', 
                 zIndex: 10 
             }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 24px', marginBottom: '10px' }}>
+                <div style={{ 
+                    display: 'flex', flexDirection: 'column', gap: '8px', 
+                    padding: isInputFocused ? '0' : '0 24px', 
+                    marginBottom: '10px' 
+                }}>
                     {/* Progress Counter */}
                     {progressStats.total > 0 && !isInputFocused && (
                         <div style={{
