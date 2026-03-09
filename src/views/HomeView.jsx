@@ -394,13 +394,22 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                                 }}
                             />
                             <button
-                                onClick={handleSave}
+                                onMouseDown={(e) => { 
+                                    if (currentThemes.length > 0 || themeInput.trim() !== '' || note.trim() !== '') {
+                                        e.preventDefault(); 
+                                        handleSave(); 
+                                    }
+                                }}
                                 disabled={currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === ''}
                                 style={{ 
-                                    position: 'absolute', right: '12px', padding: '4px',
-                                    color: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 'var(--color-supporting)' : 'var(--color-primary)',
+                                    position: 'absolute', right: '12px', padding: '6px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    borderRadius: '50%',
+                                    backgroundColor: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 'transparent' : 'var(--color-primary)',
+                                    color: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 'var(--color-supporting)' : '#fff',
                                     opacity: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 0.3 : 1,
-                                    transition: 'all 0.5s ease'
+                                    transition: 'all 0.5s ease',
+                                    boxShadow: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 'none' : '0 2px 8px rgba(0,0,0,0.1)'
                                 }}
                             >
                                 <Check size={18} />
