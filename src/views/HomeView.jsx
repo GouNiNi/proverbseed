@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { getRandomUncategorizedProverb, getAllProverbs, dbOptions, dbStore, getProverbById } from '../data/db';
-import { Heart, Check, Hash, Edit3, ArrowRight, Plus, X } from 'lucide-react';
+import { Heart, Check, Edit3, ArrowRight, Plus, X } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
 
@@ -373,7 +373,12 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                     {/* Input */}
                     <div style={{ display: 'flex', gap: '8px', opacity: 0.8 }}>
                         <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
-                            <Hash size={14} style={{ position: 'absolute', left: '12px', color: 'var(--color-supporting)' }} />
+                            <button
+                                onClick={openModal}
+                                style={{ position: 'absolute', left: '12px', color: 'var(--color-supporting)', padding: '4px' }}
+                            >
+                                <Plus size={16} />
+                            </button>
                             <input
                                 type="text"
                                 placeholder={t('home', 'etiqueter')}
@@ -383,16 +388,22 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                                 onFocus={() => setIsInputFocused(true)}
                                 onBlur={() => setIsInputFocused(false)}
                                 style={{
-                                    paddingLeft: '34px', paddingRight: '34px', background: 'transparent',
+                                    paddingLeft: '40px', paddingRight: '40px', background: 'transparent',
                                     border: 'none', borderBottom: '1px solid var(--color-supporting)',
                                     borderRadius: 0, fontSize: '0.9rem', color: 'var(--color-secondary)'
                                 }}
                             />
                             <button
-                                onClick={openModal}
-                                style={{ position: 'absolute', right: '12px', color: 'var(--color-supporting)', padding: '4px' }}
+                                onClick={handleSave}
+                                disabled={currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === ''}
+                                style={{ 
+                                    position: 'absolute', right: '12px', padding: '4px',
+                                    color: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 'var(--color-supporting)' : 'var(--color-primary)',
+                                    opacity: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 0.3 : 1,
+                                    transition: 'all 0.5s ease'
+                                }}
                             >
-                                <Plus size={16} />
+                                <Check size={18} />
                             </button>
                         </div>
                     </div>
@@ -468,26 +479,6 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                             </div>
                         )}
                     </div>
-                </div>
-
-                {/* Primary Action */}
-                <div style={{ display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
-                    <button
-                        className="btn-primary"
-                        onClick={handleSave}
-                        disabled={currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === ''}
-                        style={{
-                            pointerEvents: 'auto',
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            opacity: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 0.3 : 1,
-                            backgroundColor: (currentThemes.length === 0 && themeInput.trim() === '' && note.trim() === '') ? 'var(--color-supporting)' : 'var(--color-primary)',
-                            transition: 'all 0.5s ease',
-                            padding: '12px 32px',
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        <Check size={18} /> {t('home', 'valider')}
-                    </button>
                 </div>
             </div>
 
