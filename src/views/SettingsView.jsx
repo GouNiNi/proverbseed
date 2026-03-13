@@ -363,7 +363,7 @@ export default function SettingsView() {
                         <Upload size={18} /> {t('settings', 'importer')}
                     </button>
                 </div>
-                <input type="file" accept=".json" ref={fileInputRef} style={{ display: 'none' }} onChange={handleImport} />
+                <input type="file" accept=".json,application/json,application/*,text/*" ref={fileInputRef} style={{ display: 'none' }} onChange={handleImport} />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
