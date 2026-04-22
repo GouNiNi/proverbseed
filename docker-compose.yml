@@ -16,14 +16,14 @@ services:
       - traefik.http.routers.proverbseed.tls=true
       - traefik.http.routers.proverbseed.entrypoints=websecure
       - traefik.http.routers.proverbseed.tls.certresolver=letsencrypt
-      - traefik.http.middlewares.proverbseed.headers.SSLRedirect=true
-      - traefik.http.middlewares.proverbseed.headers.STSSeconds=315360000
-      - traefik.http.middlewares.proverbseed.headers.browserXSSFilter=true
-      - traefik.http.middlewares.proverbseed.headers.contentTypeNosniff=true
-      - traefik.http.middlewares.proverbseed.headers.forceSTSHeader=true
-      - traefik.http.middlewares.proverbseed.headers.SSLHost=${DOMAIN_NAME}
-      - traefik.http.middlewares.proverbseed.headers.STSIncludeSubdomains=true
-      - traefik.http.middlewares.proverbseed.headers.STSPreload=true
+      - traefik.http.middlewares.proverbseed.headers.sslredirect=true
+      - traefik.http.middlewares.proverbseed.headers.stsseconds=315360000
+      - traefik.http.middlewares.proverbseed.headers.browserxssfilter=true
+      - traefik.http.middlewares.proverbseed.headers.contenttypenosniff=true
+      - traefik.http.middlewares.proverbseed.headers.forcestsheader=true
+      - traefik.http.middlewares.proverbseed.headers.sslhost=${DOMAIN_NAME}
+      - traefik.http.middlewares.proverbseed.headers.stsincludesubdomains=true
+      - traefik.http.middlewares.proverbseed.headers.stspreload=true
       - traefik.http.routers.proverbseed.middlewares=proverbseed@docker
       - traefik.http.services.proverbseed.loadbalancer.server.port=80
 
