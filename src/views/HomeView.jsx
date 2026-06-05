@@ -552,29 +552,31 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                                     Aucune étiquette créée pour le moment.
                                 </p>
                             ) : (
-                                allUserThemes.map(theme => {
-                                    const isSelected = tempModalThemes.includes(theme);
-                                    return (
-                                        <button
-                                            key={theme}
-                                            onClick={() => toggleModalTheme(theme)}
-                                            style={{
-                                                backgroundColor: isSelected ? 'rgba(163, 177, 138, 0.4)' : 'transparent',
-                                                color: isSelected ? 'var(--color-secondary)' : 'var(--color-text)',
-                                                border: `1px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-supporting)'}`,
-                                                padding: '6px 12px',
-                                                borderRadius: '20px',
-                                                fontSize: '0.9rem',
-                                                transition: 'all 0.2s',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px'
-                                            }}
-                                        >
-                                            {theme} {isSelected && <Check size={14} />}
-                                        </button>
-                                    );
-                                })
+                                [...allUserThemes]
+                                    .sort((a, b) => a.localeCompare(b, language === 'fr' ? 'fr' : 'en'))
+                                    .map(theme => {
+                                        const isSelected = tempModalThemes.includes(theme);
+                                        return (
+                                            <button
+                                                key={theme}
+                                                onClick={() => toggleModalTheme(theme)}
+                                                style={{
+                                                    backgroundColor: isSelected ? 'rgba(163, 177, 138, 0.4)' : 'transparent',
+                                                    color: isSelected ? 'var(--color-secondary)' : 'var(--color-text)',
+                                                    border: `1px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-supporting)'}`,
+                                                    padding: '6px 12px',
+                                                    borderRadius: '20px',
+                                                    fontSize: '0.9rem',
+                                                    transition: 'all 0.2s',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px'
+                                                }}
+                                            >
+                                                {theme} {isSelected && <Check size={14} />}
+                                            </button>
+                                        );
+                                    })
                             )}
                         </div>
 
