@@ -267,18 +267,17 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
 
         if (parts.length > 1) {
             return (
-                <>
+                <div style={{ textAlign: 'left', display: 'inline-block', maxWidth: '100%' }}>
                     <span style={{ display: 'block' }}>{parts[0].trim()}</span>
                     <span style={{ 
                         display: 'block', 
                         marginTop: '12px', 
                         paddingLeft: '10%', 
-                        textAlign: 'left',
                         opacity: 0.9 
                     }}>
                         {parts.slice(1).join(' ').trim()}
                     </span>
-                </>
+                </div>
             );
         }
 
