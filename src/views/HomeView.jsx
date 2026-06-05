@@ -465,12 +465,14 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                                     .filter(th => th.toLowerCase().includes(themeInput.trim().toLowerCase()) && !currentThemes.includes(th))
                                     .slice(0, 5)
                                     .map((th, i) => (
-                                        <span key={`auto-${i}`} onClick={() => {
-                                            const newThemes = [...currentThemes, th];
-                                            setCurrentThemes(newThemes);
-                                            setThemeInput('');
-                                            persistThemes(newThemes);
-                                        }}
+                                        <span key={`auto-${i}`} 
+                                            onMouseDown={(e) => {
+                                                e.preventDefault();
+                                                const newThemes = [...currentThemes, th];
+                                                setCurrentThemes(newThemes);
+                                                setThemeInput('');
+                                                persistThemes(newThemes);
+                                            }}
                                             style={{ cursor: 'pointer', border: '1px dotted var(--color-supporting)', padding: '2px 8px', borderRadius: '12px' }}>
                                             + {th}
                                         </span>
@@ -482,13 +484,15 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-supporting)', display: 'flex', flexWrap: 'wrap', gap: '8px', opacity: 0.8 }}>
                                 {t('home', 'suggestions')}
                                 {proverb.suggestions.map((sugg, i) => (
-                                    <span key={i} onClick={() => {
-                                        if (!currentThemes.includes(sugg)) {
-                                            const newThemes = [...currentThemes, sugg];
-                                            setCurrentThemes(newThemes);
-                                            persistThemes(newThemes);
-                                        }
-                                    }}
+                                    <span key={i} 
+                                        onMouseDown={(e) => {
+                                            e.preventDefault();
+                                            if (!currentThemes.includes(sugg)) {
+                                                const newThemes = [...currentThemes, sugg];
+                                                setCurrentThemes(newThemes);
+                                                persistThemes(newThemes);
+                                            }
+                                        }}
                                         style={{ cursor: 'pointer', borderBottom: '1px dotted var(--color-supporting)', paddingBottom: '1px' }}>
                                         + {sugg}
                                     </span>
