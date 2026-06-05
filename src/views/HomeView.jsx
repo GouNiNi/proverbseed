@@ -256,6 +256,35 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
     const isMultiVerse = (proverb?.verses?.length ?? 1) > 1;
     const fontSize = getProverbFontSize(proverb?.text?.length ?? 0);
 
+    // Logic to split proverb into two propositions
+    const renderProverbText = () => {
+        if (!proverb?.text) return null;
+
+        // Pattern for French (Space + Uppercase) and English (Semicolon, Colon, or ", but", ", and")
+        // We look for a split point that is NOT at the very beginning
+        const splitRegex = /(?<=[,;:])\s+(?=[A-ZÀ-Ÿ])|(?<=[;:])\s+|(?<=,)\s+(?=but\s|and\s)/;
+        const parts = proverb.text.split(splitRegex);
+
+        if (parts.length > 1) {
+            return (
+                <>
+                    <span style={{ display: 'block' }}>{parts[0].trim()}</span>
+                    <span style={{ 
+                        display: 'block', 
+                        marginTop: '12px', 
+                        paddingLeft: '10%', 
+                        textAlign: 'left',
+                        opacity: 0.9 
+                    }}>
+                        {parts.slice(1).join(' ').trim()}
+                    </span>
+                </>
+            );
+        }
+
+        return proverb.text;
+    };
+
     if (!proverb) return (
         <div style={{ textAlign: 'center', marginTop: '50px', opacity: isFading ? 0 : 1, transition: 'opacity 0.5s ease' }}>
             <h2 className="title-font" style={{ fontSize: '3rem', color: 'var(--color-primary)' }}>{t('home', 'accompli')}</h2>
@@ -299,7 +328,7 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                     opacity: showContent && !isFading ? 1 : 0,
                     transition: 'opacity 0.5s ease'
                 }}>
-                    <p style={{
+                    <div style={{
                         fontSize: fontSize,
                         margin: '0 0 24px',
                         fontStyle: 'italic',
@@ -307,9 +336,10 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                         lineHeight: isMultiVerse ? '1.6' : '1.5',
                         color: 'var(--color-text)',
                         whiteSpace: 'pre-line',
+                        padding: '0 10px'
                     }}>
-                        "{proverb.text}"
-                    </p>
+                        {renderProverbText()}
+                    </div>
 
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', position: 'relative' }}>
                         <span style={{ color: 'var(--color-supporting)', fontSize: '0.9rem', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>
