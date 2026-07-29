@@ -35,6 +35,7 @@ function App() {
     const [showTutorial, setShowTutorial] = useState(false);
     const [language, setLanguage] = useState('fr');
     const [pendingEditId, setPendingEditId] = useState(null);
+    const [selectedLibraryTheme, setSelectedLibraryTheme] = useState(null);
 
     useEffect(() => {
         dbStore.getItem(dbOptions.SETTINGS).then(settings => {
@@ -95,12 +96,17 @@ function App() {
         setCurrentView('home');
     };
 
+    const handleNavigateToTheme = (themeName) => {
+        setSelectedLibraryTheme(themeName);
+        setCurrentView('library');
+    };
+
     const renderView = () => {
         switch (currentView) {
-            case 'home':     return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} />;
-            case 'library':  return <LibraryView onEditProverb={handleEditProverb} />;
+            case 'home':     return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} onNavigateToTheme={handleNavigateToTheme} />;
+            case 'library':  return <LibraryView initialTheme={selectedLibraryTheme} onClearInitialTheme={() => setSelectedLibraryTheme(null)} onEditProverb={handleEditProverb} />;
             case 'settings': return <SettingsView />;
-            default:         return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} />;
+            default:         return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} onNavigateToTheme={handleNavigateToTheme} />;
         }
     };
 

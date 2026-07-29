@@ -5,11 +5,8 @@
 | ID | Titre | Description | Statut |
 | :--- | :--- | :--- | :--- |
 | **PRO-001** | Export / Import (Portabilité des données) | Implémenter la logique d'exportation et d'importation des métadonnées (thèmes, favoris, notes) au format JSON. | ⏳ À faire |
-| **PRO-002** | Gestion des Favoris | Permettre le marquage des proverbes en favoris et créer la section dédiée dans la bibliothèque. | ⏳ À faire |
 | **PRO-003** | Notes de Méditation & Jardin de Sagesse | Implémenter la saisie de notes sur les proverbes et le système de progression du Jardin de Sagesse. | ⏳ À faire |
-| **PRO-004** | Vue "Lecture continuous" par thème | Ajouter un mode d'affichage épuré et continu des proverbes d'un thème pour la contemplation. | ⏳ À faire |
-| **PRO-006** | Suggestions d'étiquettes insensibles aux accents et à la casse | Proposer les catégories/étiquettes existantes lors de la saisie avec un matching large (insensible aux accents et majuscules). | ⏳ En attente de validation |
-| **PRO-007** | Lecture continue par catégorie après validation | Après la validation d'un proverbe, proposer la relecture des proverbes de la même catégorie (première catégorie) les uns après les autres. | ⏳ À faire |
+| **PRO-008** | Gestion du bouton Retour physique / système | Intercepter le bouton "Retour" mobile (`popstate`) pour remonter d'un cran dans la navigation interne au lieu d'iconifier l'application. | ⏳ À faire |
 
 ---
 
@@ -43,13 +40,21 @@
 - **Objectif** : Favoriser la méditation thématique après la catégorisation d'un proverbe.
 - **Détails** : Lors de la validation d'un proverbe sur l'écran principal, proposer un écran/mode pour relire les proverbes issus de la même catégorie (en prenant la première catégorie associée) affichés les uns après les autres au lieu de passer immédiatement au proverbe suivant.
 
+### PRO-008 — Gestion du bouton Retour physique / système (Bouton Back Android & Navigation)
+- **Objectif** : Offrir une navigation naturelle sur smartphone en faisant remonter l'application d'un cran dans ses vues lors de l'appui sur le bouton "Retour" physique/système.
+- **Détails** : Synchroniser l'état des écrans/vues (Bibliothèque, Favoris, Jardin, etc.) avec l'historique du navigateur (`window.history.pushState` et événement `popstate`) afin que le bouton "Retour" ramène à l'écran précédent au lieu de minimiser/iconifier l'application PWA.
+
 ---
 
 ## ✅ Tâches Terminées
 
 | ID | Titre | Description |
 | :--- | :--- | :--- |
+| **PRO-002** | Gestion des Favoris | Permettre le marquage des proverbes en favoris et créer la section dédiée dans la bibliothèque. |
+| **PRO-004** | Vue "Lecture continue" par thème | Ajouter un mode d'affichage épuré et continu des proverbes d'un thème pour la contemplation. |
 | **PRO-005** | Désactivation du remplissage automatique (Android) | Attributs HTML optimisés (`autoComplete`, `readOnly` au focus) + Désactivation du service de saisie automatique Chrome/Android. |
+| **PRO-006** | Suggestions d'étiquettes insensibles aux accents et à la casse | Suggestions dynamiques avec matching NFD (insensible aux accents et majuscules). |
+| **PRO-007** | Lecture continue par catégorie après validation | Redirection automatique vers la vue de lecture du 1er thème associé lors de la validation des étiquettes d'un proverbe depuis l'écran d'accueil (débrayable dans les Réglages). |
 | **PRO-100** | Spécifications initiales | Rédaction du document `spec.md` et définition de la charte graphique. |
 | **PRO-101** | Recherche extraction & indexation biblique | Étude des outils et formats pour le texte biblique (Louis Segond 1910). |
 | **PRO-102** | Architecture PWA & Stockage local | Sélection et validation de la stack (Vite + React + localForage). |

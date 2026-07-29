@@ -285,6 +285,20 @@ export default function SettingsView() {
                     />
                 </div>
 
+                {/* Continuous Reading On Save */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span>{t('settings', 'continuousReadingOnSave')}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-supporting)' }}>{t('settings', 'continuousReadingOnSaveDesc')}</span>
+                    </div>
+                    <input
+                        type="checkbox"
+                        style={{ width: 'auto' }}
+                        checked={settings.continuousReadingOnSave ?? true}
+                        onChange={(e) => updateSetting('continuousReadingOnSave', e.target.checked)}
+                    />
+                </div>
+
                 {/* Dark Mode */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>{t('settings', 'darkMode')}</span>

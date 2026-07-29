@@ -14,7 +14,7 @@ function getProverbFontSize(textLength) {
     return '0.94rem';
 }
 
-export default function HomeView({ pendingEditId = null, onClearPendingEdit = null }) {
+export default function HomeView({ pendingEditId = null, onClearPendingEdit = null, onNavigateToTheme = null }) {
     const language = useContext(LanguageContext);
     const t = useT();
 
@@ -232,7 +232,16 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
             if (note.trim()) { noteStore[proverb.id] = note.trim(); }
             else { delete noteStore[proverb.id]; }
             await dbStore.setItem(dbOptions.MEDITATION_NOTES, noteStore);
-            handleNext();
+
+            const s = await dbStore.getItem(dbOptions.SETTINGS);
+            const redirectEnabled = s?.continuousReadingOnSave ?? true;
+
+            if (redirectEnabled && finalThemes.length > 0 && onNavigateToTheme) {
+                const firstTheme = finalThemes[0];
+                onNavigateToTheme(firstTheme);
+            } else {
+                handleNext();
+            }
         } catch (err) {
             console.error("Save error:", err);
             alert(language === 'en' ? "Save error." : "Erreur lors de la sauvegarde.");

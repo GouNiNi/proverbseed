@@ -5,7 +5,7 @@ import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
 import { normalizeText } from '../utils/textUtils';
 
-export default function LibraryView({ onEditProverb }) {
+export default function LibraryView({ initialTheme = null, onClearInitialTheme = null, onEditProverb }) {
     const language = useContext(LanguageContext);
     const t = useT();
 
@@ -28,7 +28,13 @@ export default function LibraryView({ onEditProverb }) {
         setTimeout(() => setIsVisible(true), 50);
     };
 
-    useEffect(() => { loadLibrary(); }, [language]);
+    useEffect(() => {
+        loadLibrary();
+        if (initialTheme) {
+            selectTheme(initialTheme);
+            if (onClearInitialTheme) onClearInitialTheme();
+        }
+    }, [initialTheme, language]);
 
     const selectTheme = (theme) => {
         setIsVisible(false);
@@ -37,12 +43,14 @@ export default function LibraryView({ onEditProverb }) {
             setSelectedTheme(theme);
             const allProverbsData = await getAllProverbs(language);
             const notesData = await dbStore.getItem(dbOptions.MEDITATION_NOTES) || {};
+            const catData = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
+            const favData = await dbStore.getItem(dbOptions.FAVORITES) || [];
             setNotes(notesData);
             let provs = [];
             if (theme === '__favoris__') {
-                provs = allProverbsData.filter(p => favorites.includes(p.id));
+                provs = allProverbsData.filter(p => favData.includes(p.id));
             } else {
-                const relatedIds = Object.keys(categorized).filter(id => categorized[id].includes(theme));
+                const relatedIds = Object.keys(catData).filter(id => catData[id].includes(theme));
                 provs = allProverbsData.filter(p => relatedIds.includes(p.id));
             }
             setThemeProverbs(provs);
