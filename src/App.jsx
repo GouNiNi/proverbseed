@@ -28,15 +28,67 @@ async function checkDailyNotification(settings) {
     new Notification('🌱 ProverbSeed', { body, icon: '/pwa-192x192.png' });
 }
 
+function parseHash(hash) {
+    const cleanHash = (hash || window.location.hash).replace(/^#\/?/, '');
+    if (!cleanHash || cleanHash === 'home') {
+        return { view: 'home', theme: null };
+    }
+    if (cleanHash === 'settings') {
+        return { view: 'settings', theme: null };
+    }
+    if (cleanHash === 'library') {
+        return { view: 'library', theme: null };
+    }
+    if (cleanHash.startsWith('library/')) {
+        const rawTheme = cleanHash.substring('library/'.length);
+        const theme = decodeURIComponent(rawTheme);
+        return { view: 'library', theme: theme === 'favoris' ? '__favoris__' : theme };
+    }
+    return { view: 'home', theme: null };
+}
+
+function getHashForState(view, theme = null) {
+    if (view === 'settings') return '#settings';
+    if (view === 'library') {
+        if (theme) {
+            const themeSlug = theme === '__favoris__' ? 'favoris' : encodeURIComponent(theme);
+            return `#library/${themeSlug}`;
+        }
+        return '#library';
+    }
+    return '#home';
+}
+
 function App() {
     const [showSplash, setShowSplash] = useState(true);
     const [hidingSplash, setHidingSplash] = useState(false);
-    const [currentView, setCurrentView] = useState('home'); // home, library, settings
+    const initialRoute = parseHash();
+    const [currentView, setCurrentView] = useState(initialRoute.view); // home, library, settings
     const [showTutorial, setShowTutorial] = useState(false);
     const [language, setLanguage] = useState('fr');
     const [pendingEditId, setPendingEditId] = useState(null);
-    const [selectedLibraryTheme, setSelectedLibraryTheme] = useState(null);
+    const [selectedLibraryTheme, setSelectedLibraryTheme] = useState(initialRoute.theme);
     const [fromValidation, setFromValidation] = useState(false);
+
+    useEffect(() => {
+        // Synchroniser l'état initial dans l'historique
+        const initialHash = getHashForState(initialRoute.view, initialRoute.theme);
+        window.history.replaceState(
+            { view: initialRoute.view, theme: initialRoute.theme, fromValidation: false },
+            '',
+            initialHash
+        );
+
+        const handlePopState = (event) => {
+            const route = event.state ? event.state : parseHash();
+            setCurrentView(route.view || 'home');
+            setSelectedLibraryTheme(route.theme || null);
+            setFromValidation(!!event.state?.fromValidation);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         dbStore.getItem(dbOptions.SETTINGS).then(settings => {
@@ -92,34 +144,66 @@ function App() {
         return () => clearTimeout(hideTimer);
     }, []);
 
+    const navigateTo = (view, theme = null, isFromValidation = false) => {
+        const newHash = getHashForState(view, theme);
+        const newState = { view, theme, fromValidation: isFromValidation };
+        if (window.location.hash !== newHash) {
+            window.history.pushState(newState, '', newHash);
+        } else {
+            window.history.replaceState(newState, '', newHash);
+        }
+        setCurrentView(view);
+        setSelectedLibraryTheme(theme);
+        setFromValidation(isFromValidation);
+    };
+
     const handleEditProverb = (id) => {
         setPendingEditId(id);
-        setCurrentView('home');
+        navigateTo('home', null, false);
     };
 
     const handleNavigateToTheme = (themeName) => {
-        setSelectedLibraryTheme(themeName);
-        setFromValidation(true);
-        setCurrentView('library');
+        navigateTo('library', themeName, true);
     };
 
     const handleBackToHome = () => {
-        setFromValidation(false);
-        setSelectedLibraryTheme(null);
-        setCurrentView('home');
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            navigateTo('home', null, false);
+        }
+    };
+
+    const handleSelectThemeInLibrary = (themeName) => {
+        if (themeName) {
+            navigateTo('library', themeName, false);
+        } else {
+            navigateTo('library', null, false);
+        }
     };
 
     const handleViewChange = (view) => {
-        setFromValidation(false);
-        setCurrentView(view);
+        navigateTo(view, null, false);
     };
 
     const renderView = () => {
         switch (currentView) {
-            case 'home':     return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} onNavigateToTheme={handleNavigateToTheme} />;
-            case 'library':  return <LibraryView initialTheme={selectedLibraryTheme} onClearInitialTheme={() => setSelectedLibraryTheme(null)} fromValidation={fromValidation} onBackToHome={handleBackToHome} onEditProverb={handleEditProverb} />;
-            case 'settings': return <SettingsView />;
-            default:         return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} onNavigateToTheme={handleNavigateToTheme} />;
+            case 'home':
+                return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} onNavigateToTheme={handleNavigateToTheme} />;
+            case 'library':
+                return (
+                    <LibraryView
+                        initialTheme={selectedLibraryTheme}
+                        fromValidation={fromValidation}
+                        onBackToHome={handleBackToHome}
+                        onSelectTheme={handleSelectThemeInLibrary}
+                        onEditProverb={handleEditProverb}
+                    />
+                );
+            case 'settings':
+                return <SettingsView />;
+            default:
+                return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} onNavigateToTheme={handleNavigateToTheme} />;
         }
     };
 

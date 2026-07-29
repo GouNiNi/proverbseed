@@ -6,7 +6,6 @@
 | :--- | :--- | :--- | :--- |
 | **PRO-001** | Export / Import (Portabilité des données) | Implémenter la logique d'exportation et d'importation des métadonnées (thèmes, favoris, notes) au format JSON. | ⏳ À faire |
 | **PRO-003** | Notes de Méditation & Jardin de Sagesse | Implémenter la saisie de notes sur les proverbes et le système de progression du Jardin de Sagesse. | ⏳ À faire |
-| **PRO-008** | Gestion du bouton Retour physique / système | Intercepter le bouton "Retour" mobile (`popstate`) pour remonter d'un cran dans la navigation interne au lieu d'iconifier l'application. | ⏳ À faire |
 
 ---
 
@@ -55,6 +54,7 @@
 | **PRO-005** | Désactivation du remplissage automatique (Android) | Attributs HTML optimisés (`autoComplete`, `readOnly` au focus) + Désactivation du service de saisie automatique Chrome/Android. |
 | **PRO-006** | Suggestions d'étiquettes insensibles aux accents et à la casse | Suggestions dynamiques avec matching NFD (insensible aux accents et majuscules). |
 | **PRO-007** | Lecture continue par catégorie après validation | Redirection automatique vers la vue de lecture du 1er thème associé lors de la validation des étiquettes d'un proverbe depuis l'écran d'accueil (débrayable dans les Réglages). |
+| **PRO-008** | Gestion du bouton Retour physique / système | Interception de l'événement `popstate` et synchroniser des fragments d'URL (`#home`, `#library`, `#library/<theme>`, `#settings`) pour la navigation physique/système Android & PWA. |
 | **PRO-100** | Spécifications initiales | Rédaction du document `spec.md` et définition de la charte graphique. |
 | **PRO-101** | Recherche extraction & indexation biblique | Étude des outils et formats pour le texte biblique (Louis Segond 1910). |
 | **PRO-102** | Architecture PWA & Stockage local | Sélection et validation de la stack (Vite + React + localForage). |

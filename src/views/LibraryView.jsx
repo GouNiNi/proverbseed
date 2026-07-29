@@ -5,7 +5,7 @@ import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
 import { normalizeText } from '../utils/textUtils';
 
-export default function LibraryView({ initialTheme = null, onClearInitialTheme = null, fromValidation = false, onBackToHome = null, onEditProverb }) {
+export default function LibraryView({ initialTheme = null, fromValidation = false, onBackToHome = null, onSelectTheme = null, onEditProverb }) {
     const language = useContext(LanguageContext);
     const t = useT();
 
@@ -30,15 +30,20 @@ export default function LibraryView({ initialTheme = null, onClearInitialTheme =
 
     useEffect(() => {
         loadLibrary();
-        if (initialTheme) {
-            selectTheme(initialTheme);
-            if (onClearInitialTheme) onClearInitialTheme();
+        if (initialTheme && initialTheme !== selectedTheme) {
+            selectTheme(initialTheme, false);
+        } else if (!initialTheme && selectedTheme !== null) {
+            setSelectedTheme(null);
+            setIsVisible(true);
         }
     }, [initialTheme, language]);
 
-    const selectTheme = (theme) => {
+    const selectTheme = (theme, updateHistory = true) => {
         setIsVisible(false);
         setSearchQuery('');
+        if (updateHistory && onSelectTheme) {
+            onSelectTheme(theme);
+        }
         setTimeout(async () => {
             setSelectedTheme(theme);
             const allProverbsData = await getAllProverbs(language);
@@ -59,6 +64,7 @@ export default function LibraryView({ initialTheme = null, onClearInitialTheme =
     };
 
     const backToThemes = () => {
+        if (onSelectTheme) onSelectTheme(null);
         setIsVisible(false);
         setTimeout(() => { setSelectedTheme(null); setIsVisible(true); }, 500);
     };
