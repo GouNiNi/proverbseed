@@ -8,6 +8,7 @@
 | **PRO-002** | Gestion des Favoris | Permettre le marquage des proverbes en favoris et créer la section dédiée dans la bibliothèque. | ⏳ À faire |
 | **PRO-003** | Notes de Méditation & Jardin de Sagesse | Implémenter la saisie de notes sur les proverbes et le système de progression du Jardin de Sagesse. | ⏳ À faire |
 | **PRO-004** | Vue "Lecture continuous" par thème | Ajouter un mode d'affichage épuré et continu des proverbes d'un thème pour la contemplation. | ⏳ À faire |
+| **PRO-006** | Suggestions d'étiquettes insensibles aux accents et à la casse | Proposer les catégories/étiquettes existantes lors de la saisie avec un matching large (insensible aux accents et majuscules). | ⏳ À faire |
 
 ---
 
@@ -32,6 +33,10 @@
 ### PRO-005 — Désactivation du remplissage automatique (Android) sur les étiquettes
 - **Objectif** : Empêcher le clavier Android d'afficher les outils de remplissage automatique (mots de passe, moyens de paiement, adresses) lors de la saisie d'une étiquette afin de ne pas masquer l'écran.
 - **Détails** : Configurer les attributs HTML du champ `<input>` de saisie d'étiquettes (ex: `autoComplete="off"`, `data-form-type="other"`, attributs anti-gestionnaires) tout en préservant le dictionnaire et la prédiction de texte du clavier.
+
+### PRO-006 — Suggestions d'étiquettes insensibles aux accents et à la casse
+- **Objectif** : Améliorer la saisie d'étiquettes en proposant des suggestions dynamiques issues de la bibliothèque qui matchent indépendamment des accents et des majuscules (ex: taper "ecole" ou "Ecole" doit suggérer "École").
+- **Détails** : Normaliser la chaîne saisie et les catégories de l'utilisateur (via `String.prototype.normalize('NFD').replace(/[\u0300-\u036f]/g, '')`) lors du filtre d'autocomplétion.
 
 ---
 

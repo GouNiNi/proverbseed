@@ -477,6 +477,7 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                     }}>
                         {themeInput.trim().length > 1 && (
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                {/* TODO (PRO-006): Matcher les suggestions d'étiquettes en ignorant les accents et les majuscules (normalisation NFD) */}
                                 {allUserThemes
                                     .filter(th => th.toLowerCase().includes(themeInput.trim().toLowerCase()) && !currentThemes.includes(th))
                                     .slice(0, 5)
