@@ -39,7 +39,7 @@
 
 | ID | Titre | Description |
 | :--- | :--- | :--- |
-| **PRO-005** | Désactivation du remplissage automatique (Android) | Attributs `autoComplete="off"`, `name="..."`, `data-form-type="other"` et attributs anti-gestionnaires intégrés sur la saisie d'étiquettes, notes et recherche. |
+| **PRO-005** | Désactivation du remplissage automatique (Android) | Attributs HTML optimisés (`autoComplete`, `readOnly` au focus) + Désactivation du service de saisie automatique Chrome/Android. |
 | **PRO-100** | Spécifications initiales | Rédaction du document `spec.md` et définition de la charte graphique. |
 | **PRO-101** | Recherche extraction & indexation biblique | Étude des outils et formats pour le texte biblique (Louis Segond 1910). |
 | **PRO-102** | Architecture PWA & Stockage local | Sélection et validation de la stack (Vite + React + localForage). |
