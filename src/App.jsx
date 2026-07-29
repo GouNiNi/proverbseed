@@ -36,6 +36,7 @@ function App() {
     const [language, setLanguage] = useState('fr');
     const [pendingEditId, setPendingEditId] = useState(null);
     const [selectedLibraryTheme, setSelectedLibraryTheme] = useState(null);
+    const [fromValidation, setFromValidation] = useState(false);
 
     useEffect(() => {
         dbStore.getItem(dbOptions.SETTINGS).then(settings => {
@@ -98,13 +99,25 @@ function App() {
 
     const handleNavigateToTheme = (themeName) => {
         setSelectedLibraryTheme(themeName);
+        setFromValidation(true);
         setCurrentView('library');
+    };
+
+    const handleBackToHome = () => {
+        setFromValidation(false);
+        setSelectedLibraryTheme(null);
+        setCurrentView('home');
+    };
+
+    const handleViewChange = (view) => {
+        setFromValidation(false);
+        setCurrentView(view);
     };
 
     const renderView = () => {
         switch (currentView) {
             case 'home':     return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} onNavigateToTheme={handleNavigateToTheme} />;
-            case 'library':  return <LibraryView initialTheme={selectedLibraryTheme} onClearInitialTheme={() => setSelectedLibraryTheme(null)} onEditProverb={handleEditProverb} />;
+            case 'library':  return <LibraryView initialTheme={selectedLibraryTheme} onClearInitialTheme={() => setSelectedLibraryTheme(null)} fromValidation={fromValidation} onBackToHome={handleBackToHome} onEditProverb={handleEditProverb} />;
             case 'settings': return <SettingsView />;
             default:         return <HomeView pendingEditId={pendingEditId} onClearPendingEdit={() => setPendingEditId(null)} onNavigateToTheme={handleNavigateToTheme} />;
         }
@@ -121,7 +134,7 @@ function App() {
                 <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
                     {renderView()}
                 </main>
-                <Navigation currentView={currentView} onViewChange={setCurrentView} />
+                <Navigation currentView={currentView} onViewChange={handleViewChange} />
 
                 {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
             </div>

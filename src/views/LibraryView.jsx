@@ -5,7 +5,7 @@ import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
 import { normalizeText } from '../utils/textUtils';
 
-export default function LibraryView({ initialTheme = null, onClearInitialTheme = null, onEditProverb }) {
+export default function LibraryView({ initialTheme = null, onClearInitialTheme = null, fromValidation = false, onBackToHome = null, onEditProverb }) {
     const language = useContext(LanguageContext);
     const t = useT();
 
@@ -61,6 +61,14 @@ export default function LibraryView({ initialTheme = null, onClearInitialTheme =
     const backToThemes = () => {
         setIsVisible(false);
         setTimeout(() => { setSelectedTheme(null); setIsVisible(true); }, 500);
+    };
+
+    const handleBack = () => {
+        if (fromValidation && onBackToHome) {
+            onBackToHome();
+        } else {
+            backToThemes();
+        }
     };
 
     const deleteTheme = async (theme) => {
@@ -142,8 +150,8 @@ export default function LibraryView({ initialTheme = null, onClearInitialTheme =
 
     return (
         <div className={`fade-enter ${isVisible ? 'fade-enter-active' : ''}`} style={{ paddingBottom: '40px' }}>
-            <button className="btn-ghost" onClick={backToThemes} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', color: 'var(--color-secondary)' }}>
-                {t('library', 'retourThemes')}
+            <button className="btn-ghost" onClick={handleBack} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', color: 'var(--color-secondary)' }}>
+                {fromValidation ? t('library', 'retourAccueil') : t('library', 'retourThemes')}
             </button>
 
             <h2 className="title-font" style={{ textAlign: 'center', fontSize: '2.5rem', marginBottom: '20px' }}>{displayTitle}</h2>
