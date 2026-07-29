@@ -9,6 +9,7 @@
 | **PRO-003** | Notes de Méditation & Jardin de Sagesse | Implémenter la saisie de notes sur les proverbes et le système de progression du Jardin de Sagesse. | ⏳ À faire |
 | **PRO-004** | Vue "Lecture continuous" par thème | Ajouter un mode d'affichage épuré et continu des proverbes d'un thème pour la contemplation. | ⏳ À faire |
 | **PRO-006** | Suggestions d'étiquettes insensibles aux accents et à la casse | Proposer les catégories/étiquettes existantes lors de la saisie avec un matching large (insensible aux accents et majuscules). | ⏳ En attente de validation |
+| **PRO-007** | Lecture continue par catégorie après validation | Après la validation d'un proverbe, proposer la relecture des proverbes de la même catégorie (première catégorie) les uns après les autres. | ⏳ À faire |
 
 ---
 
@@ -37,6 +38,10 @@
 ### PRO-006 — Suggestions d'étiquettes insensibles aux accents et à la casse
 - **Objectif** : Améliorer la saisie d'étiquettes en proposant des suggestions dynamiques issues de la bibliothèque qui matchent indépendamment des accents et des majuscules (ex: taper "ecole" ou "Ecole" doit suggérer "École").
 - **Détails** : Normaliser la chaîne saisie et les catégories de l'utilisateur (via `normalizeText` NFD) avec tri prioritaire par début de mot (`startsWith`) et résolution de fusion exacte par nom d'étiquette existant.
+
+### PRO-007 — Lecture continue par catégorie après validation
+- **Objectif** : Favoriser la méditation thématique après la catégorisation d'un proverbe.
+- **Détails** : Lors de la validation d'un proverbe sur l'écran principal, proposer un écran/mode pour relire les proverbes issus de la même catégorie (en prenant la première catégorie associée) affichés les uns après les autres au lieu de passer immédiatement au proverbe suivant.
 
 ---
 
