@@ -415,21 +415,30 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                             >
                                 <Plus size={16} />
                             </button>
-                            {/* PRO-005: Attributs anti-autofill et anti-gestionnaires de mots de passe pour éviter d'obstruer l'écran sur Android */}
+                            {/* PRO-005: Désactivation stricte de la barre d'autofill Gboard/Android via readOnly au focus et autoComplete="one-time-code" */}
                             <input
                                 type="text"
-                                name="tag-input"
-                                autoComplete="off"
+                                name="no_autofill_tag"
+                                id="no_autofill_tag"
+                                autoComplete="one-time-code"
+                                aria-autocomplete="none"
                                 data-lpignore="true"
                                 data-1p-ignore="true"
                                 data-bwignore="true"
                                 data-form-type="other"
+                                readOnly
+                                onFocus={(e) => {
+                                    e.target.removeAttribute('readonly');
+                                    setIsInputFocused(true);
+                                }}
+                                onBlur={(e) => {
+                                    e.target.setAttribute('readonly', 'readonly');
+                                    setIsInputFocused(false);
+                                }}
                                 placeholder={t('home', 'etiqueter')}
                                 value={themeInput}
                                 onChange={e => setThemeInput(e.target.value)}
                                 onKeyDown={handleAddThemeLocal}
-                                onFocus={() => setIsInputFocused(true)}
-                                onBlur={() => setIsInputFocused(false)}
                                 style={{
                                     paddingLeft: '40px', paddingRight: '40px', background: 'transparent',
                                     border: 'none', borderBottom: '1px solid var(--color-supporting)',
@@ -513,18 +522,27 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                         {showNote ? (
                             <div style={{ opacity: showContent && !isFading ? 1 : 0, transition: 'opacity 0.5s ease' }}>
                                 <textarea
-                                    name="note-input"
-                                    autoComplete="off"
+                                    name="no_autofill_note"
+                                    id="no_autofill_note"
+                                    autoComplete="one-time-code"
+                                    aria-autocomplete="none"
                                     data-lpignore="true"
                                     data-1p-ignore="true"
                                     data-bwignore="true"
                                     data-form-type="other"
+                                    readOnly
+                                    onFocus={(e) => {
+                                        e.target.removeAttribute('readonly');
+                                        setIsInputFocused(true);
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.setAttribute('readonly', 'readonly');
+                                        setIsInputFocused(false);
+                                    }}
                                     rows="2"
                                     placeholder={t('home', 'notePlaceholder')}
                                     value={note}
                                     onChange={e => setNote(e.target.value)}
-                                    onFocus={() => setIsInputFocused(true)}
-                                    onBlur={() => setIsInputFocused(false)}
                                     style={{
                                         background: 'transparent', border: '1px solid var(--color-supporting)',
                                         borderRadius: 'var(--radius-sm)', fontSize: '0.9rem', color: 'var(--color-secondary)',

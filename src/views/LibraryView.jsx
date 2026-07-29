@@ -144,12 +144,17 @@ export default function LibraryView({ onEditProverb }) {
                 <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-supporting)' }} />
                 <input
                     type="search"
-                    name="search-input"
-                    autoComplete="off"
+                    name="no_autofill_search"
+                    id="no_autofill_search"
+                    autoComplete="one-time-code"
+                    aria-autocomplete="none"
                     data-lpignore="true"
                     data-1p-ignore="true"
                     data-bwignore="true"
                     data-form-type="other"
+                    readOnly
+                    onFocus={(e) => e.target.removeAttribute('readonly')}
+                    onBlur={(e) => e.target.setAttribute('readonly', 'readonly')}
                     placeholder={t('library', 'rechercherPlaceholder')}
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
