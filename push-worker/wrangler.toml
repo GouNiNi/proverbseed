@@ -1,0 +1,10 @@
+name = "proverbseed-push"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "SUBSCRIPTIONS"
+id = "a148f26e416343d98cfc33a7965f4b23"
+
+[triggers]
+crons = ["*/5 * * * *"]

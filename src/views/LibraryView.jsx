@@ -143,7 +143,13 @@ export default function LibraryView({ onEditProverb }) {
             <div style={{ position: 'relative', marginBottom: '20px' }}>
                 <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-supporting)' }} />
                 <input
-                    type="text"
+                    type="search"
+                    name="search-input"
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-bwignore="true"
+                    data-form-type="other"
                     placeholder={t('library', 'rechercherPlaceholder')}
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}

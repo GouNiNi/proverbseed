@@ -415,8 +415,15 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                             >
                                 <Plus size={16} />
                             </button>
+                            {/* PRO-005: Attributs anti-autofill et anti-gestionnaires de mots de passe pour éviter d'obstruer l'écran sur Android */}
                             <input
                                 type="text"
+                                name="tag-input"
+                                autoComplete="off"
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
+                                data-form-type="other"
                                 placeholder={t('home', 'etiqueter')}
                                 value={themeInput}
                                 onChange={e => setThemeInput(e.target.value)}
@@ -506,6 +513,12 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                         {showNote ? (
                             <div style={{ opacity: showContent && !isFading ? 1 : 0, transition: 'opacity 0.5s ease' }}>
                                 <textarea
+                                    name="note-input"
+                                    autoComplete="off"
+                                    data-lpignore="true"
+                                    data-1p-ignore="true"
+                                    data-bwignore="true"
+                                    data-form-type="other"
                                     rows="2"
                                     placeholder={t('home', 'notePlaceholder')}
                                     value={note}
