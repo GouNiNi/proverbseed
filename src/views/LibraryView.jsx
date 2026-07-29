@@ -3,6 +3,7 @@ import { dbStore, dbOptions, getAllProverbs } from '../data/db';
 import { ChevronRight, Trash2, Heart, Edit3, Search } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
+import { normalizeText } from '../utils/textUtils';
 
 export default function LibraryView({ onEditProverb }) {
     const language = useContext(LanguageContext);
@@ -126,8 +127,8 @@ export default function LibraryView({ onEditProverb }) {
 
     const filteredProverbs = searchQuery.trim()
         ? themeProverbs.filter(p => {
-            const q = searchQuery.trim().toLowerCase();
-            return p.text.toLowerCase().includes(q) || (notes[p.id] || '').toLowerCase().includes(q);
+            const normQ = normalizeText(searchQuery.trim());
+            return normalizeText(p.text).includes(normQ) || normalizeText(notes[p.id] || '').includes(normQ);
         })
         : themeProverbs;
 

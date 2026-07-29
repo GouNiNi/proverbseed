@@ -3,6 +3,7 @@ import { getRandomUncategorizedProverb, getAllProverbs, dbOptions, dbStore, getP
 import { Heart, Check, Edit3, ArrowRight, Plus, X } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
+import { filterAndSortTagSuggestions, resolveTagWithExisting } from '../utils/textUtils';
 
 // Returns font size based on character length of the proverb text
 function getProverbFontSize(textLength) {
@@ -192,11 +193,14 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
 
     const handleAddThemeLocal = async (e) => {
         if (e.key === 'Enter' || e.type === 'click') {
-            const val = themeInput.trim();
-            if (val && !currentThemes.includes(val)) {
-                const newThemes = [...currentThemes, val];
-                setCurrentThemes(newThemes);
-                await persistThemes(newThemes);
+            const rawVal = themeInput.trim();
+            if (rawVal) {
+                const resolvedTag = resolveTagWithExisting(rawVal, allUserThemes);
+                if (!currentThemes.includes(resolvedTag)) {
+                    const newThemes = [...currentThemes, resolvedTag];
+                    setCurrentThemes(newThemes);
+                    await persistThemes(newThemes);
+                }
             }
             setThemeInput('');
         }
@@ -212,11 +216,14 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
         if (!proverb) return;
         const pendingInput = themeInput.trim();
         let finalThemes = [...currentThemes];
-        if (pendingInput && !finalThemes.includes(pendingInput)) {
-            finalThemes.push(pendingInput);
-            setCurrentThemes(finalThemes);
+        if (pendingInput) {
+            const resolvedTag = resolveTagWithExisting(pendingInput, allUserThemes);
+            if (!finalThemes.includes(resolvedTag)) {
+                finalThemes.push(resolvedTag);
+                setCurrentThemes(finalThemes);
+                await persistThemes(finalThemes);
+            }
             setThemeInput('');
-            await persistThemes(finalThemes);
         }
         try {
             // Favorite is already handled by toggleFavorite, but we ensure it's synced if needed
@@ -473,14 +480,11 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                     <div style={{
                         opacity: showContent && !isFading ? 1 : 0,
                         transition: 'opacity 0.5s ease',
-                        minHeight: (themeInput.trim().length > 1 || (settings.categorizationAid && proverb.suggestions?.length > 0)) ? 'auto' : '0'
+                        minHeight: (themeInput.trim().length > 0 || (settings.categorizationAid && proverb.suggestions?.length > 0)) ? 'auto' : '0'
                     }}>
-                        {themeInput.trim().length > 1 && (
+                        {themeInput.trim().length > 0 && (
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-secondary)', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                {/* TODO (PRO-006): Matcher les suggestions d'étiquettes en ignorant les accents et les majuscules (normalisation NFD) */}
-                                {allUserThemes
-                                    .filter(th => th.toLowerCase().includes(themeInput.trim().toLowerCase()) && !currentThemes.includes(th))
-                                    .slice(0, 5)
+                                {filterAndSortTagSuggestions(allUserThemes, themeInput, currentThemes, 5)
                                     .map((th, i) => (
                                         <span key={`auto-${i}`} 
                                             onMouseDown={(e) => {
@@ -500,20 +504,23 @@ export default function HomeView({ pendingEditId = null, onClearPendingEdit = nu
                         {settings.categorizationAid && proverb.suggestions?.length > 0 && themeInput.trim().length === 0 && (
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-supporting)', display: 'flex', flexWrap: 'wrap', gap: '8px', opacity: 0.8 }}>
                                 {t('home', 'suggestions')}
-                                {proverb.suggestions.map((sugg, i) => (
-                                    <span key={i} 
-                                        onMouseDown={(e) => {
-                                            e.preventDefault();
-                                            if (!currentThemes.includes(sugg)) {
-                                                const newThemes = [...currentThemes, sugg];
-                                                setCurrentThemes(newThemes);
-                                                persistThemes(newThemes);
-                                            }
-                                        }}
-                                        style={{ cursor: 'pointer', borderBottom: '1px dotted var(--color-supporting)', paddingBottom: '1px' }}>
-                                        + {sugg}
-                                    </span>
-                                ))}
+                                {proverb.suggestions.map((sugg, i) => {
+                                    const resolvedSugg = resolveTagWithExisting(sugg, allUserThemes);
+                                    return (
+                                        <span key={i} 
+                                            onMouseDown={(e) => {
+                                                e.preventDefault();
+                                                if (!currentThemes.includes(resolvedSugg)) {
+                                                    const newThemes = [...currentThemes, resolvedSugg];
+                                                    setCurrentThemes(newThemes);
+                                                    persistThemes(newThemes);
+                                                }
+                                            }}
+                                            style={{ cursor: 'pointer', borderBottom: '1px dotted var(--color-supporting)', paddingBottom: '1px' }}>
+                                            + {resolvedSugg}
+                                        </span>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

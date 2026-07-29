@@ -112,3 +112,10 @@ Usage : `const t = useT(); t('section', 'clé')`
 - Variables CSS : `--color-primary`, `--color-supporting`, `--color-background`, etc.
 - Dark mode via `data-theme="dark"` sur `<html>`
 - Taille de police des versets : `getProverbFontSize(longueur)` dans `HomeView.jsx`
+
+---
+
+## ⚠️ Règles de développement strictes
+
+1. **Validation des tâches (`TODO.md`)** : Une tâche réalisée ne doit **JAMAIS** être directement marquée comme terminée (`✅ Terminée`) sans l'accord/validation explicite de l'utilisateur. Après développement, marquer la tâche au statut **`⏳ En attente de validation`**.
+2. **Bump de version avant chaque push** : Toute modification destinée à être pushée sur le dépôt nécessite impérativement un bump de version (`npm version patch`, `minor` ou `major`).
