@@ -2,7 +2,13 @@
 
 ## Projet
 PWA de méditation biblique (Proverbes de Salomon). Vite + React, déployée sur https://proverbseed.geekarea.fr/.
-Version courante : voir `package.json` → champ `version`.
+Version courante : voir `.version` (Source Unique de Vérité).
+
+### Système de Versioning
+- **Source de Vérité** : Fichier `.version` à la racine.
+- **Commande de mise à jour** : `npm run bump-version <patch|minor|major|version>`.
+- **Génération automatique** : Vite génère automatiquement `dist/version.json` et injecte `__APP_VERSION__` lors du build.
+- **Règle** : Ne **JAMAIS** modifier manuellement `package.json` pour la version afin de préserver le cache Docker (`npm ci`).
 
 ---
 
@@ -10,6 +16,7 @@ Version courante : voir `package.json` → champ `version`.
 
 ```
 proverbseed/
+├── .version            # Source unique de vérité pour la version
 ├── src/
 │   ├── views/          # HomeView, LibraryView, SettingsView
 │   ├── components/     # Navigation, TutorialOverlay
@@ -20,8 +27,10 @@ proverbseed/
 ├── push-worker/        # Cloudflare Worker — notifications push
 │   ├── src/worker.js
 │   └── wrangler.toml
-├── package.json        # Source de vérité pour la version
-└── vite.config.js      # Lit package.json → injecte __APP_VERSION__
+├── package.json        # Dépendances et scripts de build
+├── vite.config.js      # Lit .version → injecte __APP_VERSION__ et émet dist/version.json
+└── scripts/
+    └── bump-version.js # Script de bump (met à jour .version)
 ```
 
 ---

@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "bump-version": "node scripts/bump-version.js",
     "deploy": "git push origin HEAD:main && git -C /Users/gounini/Documents/proverbseed pull origin main --quiet"
   },
   "dependencies": {
