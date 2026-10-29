@@ -4,11 +4,56 @@
 PWA de méditation biblique (Proverbes de Salomon). Vite + React, déployée sur https://proverbseed.geekarea.fr/.
 Version courante : voir `.version` (Source Unique de Vérité).
 
-### Système de Versioning
-- **Source de Vérité** : Fichier `.version` à la racine.
-- **Commande de mise à jour** : `npm run bump-version <patch|minor|major|version>`.
+### 🔢 Système de Versioning & Règles d'Incrémentation
+
+Le projet suit un versioning sémantique strict au format `majeur.mineur.micro` (ex: `1.7.0`).
+
+- **Source Unique de Vérité (SSOT)** : Fichier `.version` à la racine.
+- **Règle Docker & Cache** : Ne **JAMAIS** modifier manuellement `package.json` pour la version. Cela garantit que la couche Docker `npm ci` reste en cache.
+- **Règles d'incrémentation** :
+  - **`micro` (ou `patch`)** : correctifs de bugs, patchs, retouches mineures. Incrément **automatique à l'initiative de l'agent IA**.
+  - **`mineur` (ou `minor`)** : ajouts de fonctionnalités, évolutions fonctionnelles rétrocompatibles. Incrément **automatique à l'initiative de l'agent IA**.
+  - **`majeur` (ou `major`)** : changements d'architecture, refontes ou ruptures importantes. **Consigne ou accord explicite de l'utilisateur (JD) obligatoire**.
+- **Commande de mise à jour** :
+  ```bash
+  npm run bump-version <micro|mineur|majeur|patch|minor|major>
+  ```
 - **Génération automatique** : Vite génère automatiquement `dist/version.json` et injecte `__APP_VERSION__` lors du build.
-- **Règle** : Ne **JAMAIS** modifier manuellement `package.json` pour la version afin de préserver le cache Docker (`npm ci`).
+
+---
+
+## 🧪 Tests Unitaires
+
+Le projet utilise le runner natif Node.js (`node:test`) pour tester les fonctions utilitaires et la synchronisation i18n :
+- **Lancer les tests** :
+  ```bash
+  npm test
+  ```
+- **Périmètre** : Normalisation de texte, filtre et tri préfixé des étiquettes (`textUtils.js`), synchronisation stricte des clés de traduction (`translations.js`) et intégrité de `.version`.
+
+---
+
+## 🔄 Workflow Multi-Agent & Release
+
+1. **Worktree & Branche :**
+   ```bash
+   git worktree add .worktrees/<ticket> -b feature/<ticket>
+   ln -s ../../node_modules .worktrees/<ticket>/node_modules
+   ```
+   Ne **JAMAIS** modifier `.version` sur la branche ou dans le worktree.
+2. **Dev & Tests dans le worktree :** `npm test` (100% vert).
+3. **Pipeline de Release sur `main` dans le dépôt principal :**
+   ```bash
+   cd /Users/gounini/Documents/ia-workspace/proverbseed
+   git checkout main && git fetch origin && git rebase origin/main && git merge feature/<ticket>
+   npm run bump-version <micro|mineur|majeur>
+   npm run build
+   git commit -am "chore: release vX.Y.Z"
+   npm test
+   git push origin main
+   git worktree remove .worktrees/<ticket>
+   git branch -d feature/<ticket>
+   ```
 
 ---
 

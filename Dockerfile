@@ -3,12 +3,19 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package files and install dependencies
+# 1. Dépendances avec cache
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
-# Copy source code and build the application
-COPY . .
+# 2. Assets publics statiques
+COPY public ./public
+
+# 3. Code source, configuration et version
+COPY .version ./
+COPY index.html vite.config.js eslint.config.js ./
+COPY src ./src
+
+# Build de l'application
 RUN npm run build
 
 # Production stage
