@@ -124,7 +124,25 @@ Usage : `const t = useT(); t('section', 'clé')`
 
 ---
 
+## 📋 Gestion des Tâches (`TODO/`)
+
+Le suivi des tâches est géré sous forme de fichiers unitaires dans [`TODO/`](./TODO/README.md) :
+- **`TODO/todo/`** : tâches prêtes à être prises en charge (point d'entrée).
+- **`TODO/doing/`** : tâche en cours de traitement par un agent (verrou anti-doublon).
+- **`TODO/tovalidate/`** : tâche terminée par l'agent, en attente de validation par l'utilisateur (JD).
+- **`TODO/done/`** : validé par l'utilisateur (toutes les tâches terminées y sont archivées unitairement).
+- **`TODO/wontfix/`** : abandonné.
+- **`TODO/archive/`** : archives historiques (`TODO-legacy.md`).
+
+### Workflow pour les Agents IA :
+1. **Prendre un ticket** : `ls TODO/todo/`, lire uniquement le ticket choisi, le déplacer immédiatement : `git mv TODO/todo/<ticket>.md TODO/doing/`.
+2. **Fin de tâche** : compléter les *Notes de réalisation* dans le ticket, puis le déplacer : `git mv TODO/doing/<ticket>.md TODO/tovalidate/`. Seul l'utilisateur déplace un ticket vers `done/` ou `wontfix/`. Une tâche réalisée ne doit **JAMAIS** être directement marquée comme terminée (`done/`) sans l'accord/validation explicite de l'utilisateur.
+3. **Création d'un ticket** : créer directement dans `TODO/todo/` au format `YYYYMMDD-HHMM-[slug-court].md`.
+4. **Économie de tokens** : ne consulter `done/`, `wontfix/` ou `archive/` qu'en cas de besoin avéré.
+
+---
+
 ## ⚠️ Règles de développement strictes
 
-1. **Validation des tâches (`TODO.md`)** : Une tâche réalisée ne doit **JAMAIS** être directement marquée comme terminée (`✅ Terminée`) sans l'accord/validation explicite de l'utilisateur. Après développement, marquer la tâche au statut **`⏳ En attente de validation`**.
-2. **Bump de version avant chaque push** : Toute modification destinée à être pushée sur le dépôt nécessite impérativement un bump de version (`npm version patch`, `minor` ou `major`).
+1. **Validation des tâches** : Respecter impérativement le workflow Kanban ci-dessus (déplacement dans `tovalidate/` en fin de dev).
+2. **Bump de version avant chaque push de code** : Toute modification de code applicatif destinée à être pushée sur le dépôt nécessite impérativement un bump de version (`npm version patch`, `minor` ou `major`). (Rappel : les commits de pure documentation ou TODO sont exemptés de rebuild par le webhook).
