@@ -38,8 +38,9 @@ services:
       - "traefik.http.middlewares.proverbseed-sablier.plugin.sablier.sablierUrl=http://sablier:10000"
       - "traefik.http.middlewares.proverbseed-sablier.plugin.sablier.names=proverbseed"
       - "traefik.http.middlewares.proverbseed-sablier.plugin.sablier.sessionDuration=5m"
-      - "traefik.http.middlewares.proverbseed-sablier.plugin.sablier.dynamic.theme=ghost"
-      - "traefik.http.middlewares.proverbseed-sablier.plugin.sablier.dynamic.showDetails=true"
+      - "traefik.http.middlewares.proverbseed-sablier.plugin.sablier.dynamic.theme=geekarea"
+      - "traefik.http.middlewares.proverbseed-sablier.plugin.sablier.dynamic.displayName=ProverbSeed"
+      - "traefik.http.middlewares.proverbseed-sablier.plugin.sablier.dynamic.showDetails=false"
 
 networks:
   proxy:
