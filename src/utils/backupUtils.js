@@ -205,17 +205,43 @@ export async function exportBackup(backupPayload, { forceDownload = false } = {}
 }
 
 /**
- * Évalue si une sauvegarde est recommandée :
- * - Vrai si l'utilisateur possède au moins un élément (totalItems > 0)
- *   et qu'aucune sauvegarde n'a été faite ou que la dernière sauvegarde date de plus de `thresholdDays` jours.
+ * Calcule l'ancienneté en jours depuis une date donnée.
  */
-export function isBackupRecommended({ lastBackupDate = null, totalItems = 0, thresholdDays = 14 } = {}) {
+export function getElapsedDays(dateString) {
+    if (!dateString) return null;
+    const time = new Date(dateString).getTime();
+    if (isNaN(time)) return null;
+    return (Date.now() - time) / (1000 * 60 * 60 * 24);
+}
+
+/**
+ * Évalue si une sauvegarde est recommandée (pastille orange sur les réglages) :
+ * - Vrai si l'utilisateur possède au moins un élément (totalItems > 0)
+ *   et que le délai réglé (thresholdDays) est dépassé ou qu'aucune sauvegarde n'a été faite.
+ */
+export function isBackupRecommended({ lastBackupDate = null, firstActivityDate = null, totalItems = 0, thresholdDays = 14 } = {}) {
     if (!totalItems || totalItems <= 0) return false;
-    if (!lastBackupDate) return true;
-    const time = new Date(lastBackupDate).getTime();
-    if (isNaN(time)) return true;
-    const diffDays = (Date.now() - time) / (1000 * 60 * 60 * 24);
-    return diffDays >= thresholdDays;
+    if (!thresholdDays || thresholdDays <= 0) return false;
+    const refDate = lastBackupDate || firstActivityDate;
+    if (!refDate) return true;
+    const days = getElapsedDays(refDate);
+    if (days === null) return true;
+    return days >= thresholdDays;
+}
+
+/**
+ * Évalue si une sauvegarde est urgente (notification in-app déclenchée à 2x le délai réglé) :
+ * - Vrai si l'utilisateur possède des données (totalItems > 0)
+ *   et qu'aucune sauvegarde n'a été faite depuis au moins 2 * thresholdDays.
+ */
+export function isBackupUrgent({ lastBackupDate = null, firstActivityDate = null, totalItems = 0, thresholdDays = 14 } = {}) {
+    if (!totalItems || totalItems <= 0) return false;
+    if (!thresholdDays || thresholdDays <= 0) return false;
+    const refDate = lastBackupDate || firstActivityDate;
+    if (!refDate) return false;
+    const days = getElapsedDays(refDate);
+    if (days === null) return false;
+    return days >= (2 * thresholdDays);
 }
 
 /**

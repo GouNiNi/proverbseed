@@ -8,6 +8,7 @@ import {
     isCloudOrSystemSaveSupported,
     exportBackup,
     isBackupRecommended,
+    isBackupUrgent,
     formatLastBackupDate
 } from '../../src/utils/backupUtils.js';
 
@@ -199,6 +200,33 @@ describe('backupUtils — Partage natif et rappel contextuel (PRO-012)', () => {
 
         // Date invalide -> recommandation de sécurité
         assert.strictEqual(isBackupRecommended({ lastBackupDate: 'date_invalide', totalItems: 2 }), true);
+
+        // Désactivé (thresholdDays = 0) -> pas de recommandation
+        assert.strictEqual(isBackupRecommended({ lastBackupDate: null, totalItems: 5, thresholdDays: 0 }), false);
+    });
+
+    it('isBackupUrgent détecte le doublement du délai réglé pour la notification in-app', () => {
+        // Aucune donnée -> jamais urgent
+        assert.strictEqual(isBackupUrgent({ lastBackupDate: null, totalItems: 0 }), false);
+
+        // Seuil désactivé (0) -> jamais urgent
+        assert.strictEqual(isBackupUrgent({ lastBackupDate: null, totalItems: 5, thresholdDays: 0 }), false);
+
+        // Sauvegarde il y a 15 jours (recommandé si seuil=14, mais pas urgent car < 28 jours)
+        const date15j = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString();
+        assert.strictEqual(isBackupUrgent({ lastBackupDate: date15j, totalItems: 5, thresholdDays: 14 }), false);
+
+        // Sauvegarde il y a 29 jours (urgent car >= 28 jours)
+        const date29j = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString();
+        assert.strictEqual(isBackupUrgent({ lastBackupDate: date29j, totalItems: 5, thresholdDays: 14 }), true);
+
+        // Sans sauvegarde, mais première activité récente (< 28 jours) -> pas encore urgent
+        const activity10j = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+        assert.strictEqual(isBackupUrgent({ lastBackupDate: null, firstActivityDate: activity10j, totalItems: 5, thresholdDays: 14 }), false);
+
+        // Sans sauvegarde, mais première activité ancienne (>= 28 jours) -> urgent
+        const activity30j = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        assert.strictEqual(isBackupUrgent({ lastBackupDate: null, firstActivityDate: activity30j, totalItems: 5, thresholdDays: 14 }), true);
     });
 
     it('formatLastBackupDate formate correctement l\'ancienneté en texte lisible', () => {

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
+import { AlertCircle, X } from 'lucide-react';
 import HomeView from './views/HomeView';
 import LibraryView from './views/LibraryView';
 import SettingsView from './views/SettingsView';
 import Navigation from './components/Navigation';
 import TutorialOverlay from './components/TutorialOverlay';
 import { LanguageContext } from './i18n/LanguageContext';
+import { useTranslation } from './i18n/translations';
 import { dbStore, dbOptions } from './data/db';
+import { isBackupRecommended, isBackupUrgent } from './utils/backupUtils';
 
 // Fallback : envoie une notification si l'heure est passée et qu'elle n'a pas encore été envoyée aujourd'hui
 async function checkDailyNotification(settings) {
@@ -69,6 +72,54 @@ function App() {
     const [pendingEditId, setPendingEditId] = useState(null);
     const [selectedLibraryTheme, setSelectedLibraryTheme] = useState(initialRoute.theme);
     const [fromValidation, setFromValidation] = useState(false);
+    const [hasBackupRecommendation, setHasBackupRecommendation] = useState(false);
+    const [hasBackupUrgent, setHasBackupUrgent] = useState(false);
+    const [backupReminderDays, setBackupReminderDays] = useState(14);
+    const [bannerDismissed, setBannerDismissed] = useState(false);
+    const t = useTranslation(language);
+
+    const checkBackupStatus = async () => {
+        try {
+            const [settings, themes, cat, fav, notes] = await Promise.all([
+                dbStore.getItem(dbOptions.SETTINGS),
+                dbStore.getItem(dbOptions.USER_THEMES),
+                dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS),
+                dbStore.getItem(dbOptions.FAVORITES),
+                dbStore.getItem(dbOptions.MEDITATION_NOTES),
+            ]);
+            const total = (themes || []).length + Object.keys(cat || {}).length + (fav || []).length + Object.keys(notes || {}).length;
+            const reminderDays = settings?.backupReminderDays ?? 14;
+            setBackupReminderDays(reminderDays);
+            const lastBackup = settings?.lastBackupDate ?? null;
+            let firstActivity = settings?.firstActivityDate ?? null;
+
+            if (total > 0 && !firstActivity && !lastBackup) {
+                firstActivity = new Date().toISOString();
+                if (settings) {
+                    await dbStore.setItem(dbOptions.SETTINGS, { ...settings, firstActivityDate: firstActivity });
+                }
+            }
+
+            const recommended = isBackupRecommended({
+                lastBackupDate: lastBackup,
+                firstActivityDate: firstActivity,
+                totalItems: total,
+                thresholdDays: reminderDays
+            });
+
+            const urgent = isBackupUrgent({
+                lastBackupDate: lastBackup,
+                firstActivityDate: firstActivity,
+                totalItems: total,
+                thresholdDays: reminderDays
+            });
+
+            setHasBackupRecommendation(recommended);
+            setHasBackupUrgent(urgent);
+        } catch (err) {
+            console.error('Erreur verification statut sauvegarde:', err);
+        }
+    };
 
     useEffect(() => {
         // Synchroniser l'état initial dans l'historique
@@ -111,9 +162,13 @@ function App() {
             if (document.visibilityState === 'visible') {
                 const settings = await dbStore.getItem(dbOptions.SETTINGS);
                 if (settings?.notificationsEnabled) checkDailyNotification(settings);
+                checkBackupStatus();
             }
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        checkBackupStatus();
+        window.addEventListener('backupStateChange', checkBackupStatus);
 
         const handleShowTutorial = () => setShowTutorial(true);
         window.addEventListener('showTutorial', handleShowTutorial);
@@ -130,6 +185,7 @@ function App() {
         return () => {
             clearInterval(interval);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('backupStateChange', checkBackupStatus);
             window.removeEventListener('showTutorial', handleShowTutorial);
             window.removeEventListener('languageChange', handleLanguageChange);
             window.removeEventListener('themeChange', handleThemeChange);
@@ -215,10 +271,39 @@ function App() {
                         <h1 className="splash-title title-font">ProverbSeed</h1>
                     </div>
                 )}
+                {hasBackupUrgent && !bannerDismissed && currentView !== 'settings' && (
+                    <div className="backup-urgent-banner">
+                        <div className="backup-urgent-content">
+                            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                            <span>
+                                {t('settings', 'alerteSauvegardeUrgente').replace('{days}', (backupReminderDays * 2).toString())}
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button
+                                className="backup-urgent-btn"
+                                onClick={() => navigateTo('settings')}
+                            >
+                                {t('settings', 'sauvegarderMaintenant')}
+                            </button>
+                            <button
+                                className="backup-urgent-close"
+                                onClick={() => setBannerDismissed(true)}
+                                aria-label="Fermer"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    </div>
+                )}
                 <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
                     {renderView()}
                 </main>
-                <Navigation currentView={currentView} onViewChange={handleViewChange} />
+                <Navigation
+                    currentView={currentView}
+                    onViewChange={handleViewChange}
+                    hasBackupRecommendation={hasBackupRecommendation}
+                />
 
                 {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
             </div>

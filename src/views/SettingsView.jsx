@@ -83,6 +83,7 @@ export default function SettingsView() {
             backupPayloadRef.current.proverbseed_backup.settings = newSettings;
         }
         await dbStore.setItem(dbOptions.SETTINGS, newSettings);
+        window.dispatchEvent(new CustomEvent('backupStateChange'));
         if (key === 'language') {
             window.dispatchEvent(new CustomEvent('languageChange', { detail: value }));
         }
@@ -261,10 +262,11 @@ export default function SettingsView() {
 
     const days = t('settings', 'days');
     const shareAvailable = isCloudOrSystemSaveSupported();
+    const backupReminderDays = settings.backupReminderDays ?? 14;
     const backupRecommended = isBackupRecommended({
         lastBackupDate: settings.lastBackupDate,
         totalItems: totalDataItems,
-        thresholdDays: 14
+        thresholdDays: backupReminderDays
     });
     const lastBackupFormatted = formatLastBackupDate(settings.lastBackupDate, t);
 
@@ -456,6 +458,43 @@ export default function SettingsView() {
                             {t('settings', 'sauvegardeRecommandee')}
                         </span>
                     )}
+                </div>
+
+                {/* Fréquence du rappel de sauvegarde */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--color-supporting)' }}>
+                        {t('settings', 'frequenceRappel')}
+                    </span>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {[
+                            { value: 7, label: t('settings', 'frequence7Jours') },
+                            { value: 14, label: t('settings', 'frequence14Jours') },
+                            { value: 30, label: t('settings', 'frequence30Jours') },
+                            { value: 0, label: t('settings', 'frequenceDesactive') },
+                        ].map((opt) => {
+                            const isSelected = (settings.backupReminderDays ?? 14) === opt.value;
+                            return (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => updateSetting('backupReminderDays', opt.value)}
+                                    style={{
+                                        flex: 1,
+                                        padding: '7px 6px',
+                                        fontSize: '0.8rem',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        backgroundColor: isSelected ? 'var(--color-primary)' : 'transparent',
+                                        color: isSelected ? 'white' : 'var(--color-supporting)',
+                                        border: `1px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border, rgba(0,0,0,0.15))'}`,
+                                        transition: 'all var(--transition-fast)'
+                                    }}
+                                >
+                                    {opt.label}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
 
                 {/* Boutons d'action : Partage natif cloud / Télécharger / Importer */}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Home, BookOpen, Settings, Menu, X } from 'lucide-react';
 import { useT } from '../i18n/LanguageContext';
 
-export default function Navigation({ currentView, onViewChange }) {
+export default function Navigation({ currentView, onViewChange, hasBackupRecommendation = false }) {
     const [isOpen, setIsOpen] = useState(false);
     const t = useT();
 
@@ -41,8 +41,9 @@ export default function Navigation({ currentView, onViewChange }) {
                         onClick={() => handleNavigate('settings')}
                     >
                         <span>{t('navigation', 'reglages')}</span>
-                        <div className="nav-icon-bg">
+                        <div className="nav-icon-bg" style={{ position: 'relative' }}>
                             <Settings size={20} strokeWidth={1.5} />
+                            {hasBackupRecommendation && <span className="nav-badge-dot" />}
                         </div>
                     </button>
                 </div>
@@ -54,6 +55,7 @@ export default function Navigation({ currentView, onViewChange }) {
                 aria-label={t('navigation', 'menu')}
             >
                 {isOpen ? <X size={24} strokeWidth={1.5} /> : <Menu size={24} strokeWidth={1.5} />}
+                {hasBackupRecommendation && !isOpen && <span className="nav-badge-dot" />}
             </button>
         </>
     );

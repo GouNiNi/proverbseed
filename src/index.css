@@ -464,3 +464,85 @@ body.keyboard-open .nav-expanded-controls {
   width: 16px;
   border-radius: 4px;
 }
+
+
+/* Pastille de recommandation de sauvegarde sur la navigation */
+.nav-badge-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #d97706;
+  border: 2px solid var(--color-background, #fff);
+  box-shadow: 0 0 4px rgba(217, 119, 6, 0.6);
+  pointer-events: none;
+}
+
+.nav-expanded-btn .nav-badge-dot {
+  top: 2px;
+  right: 2px;
+}
+
+/* Bannière / Notification in-app pour sauvegarde urgente (2x intervalle) */
+.backup-urgent-banner {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background-color: #fffbeb;
+  border-bottom: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .backup-urgent-banner {
+  background-color: #78350f;
+  border-bottom: 1px solid #92400e;
+  color: #fef3c7;
+}
+
+.backup-urgent-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.backup-urgent-btn {
+  background-color: #d97706;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast);
+}
+
+.backup-urgent-btn:hover {
+  background-color: #b45309;
+}
+
+.backup-urgent-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  padding: 4px;
+}
+
+.backup-urgent-close:hover {
+  opacity: 1;
+}
