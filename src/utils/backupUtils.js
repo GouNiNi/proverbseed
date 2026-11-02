@@ -85,3 +85,93 @@ export function validateBackup(json) {
         settings
     };
 }
+
+/**
+ * Vérifie si la Web Share API est supportée pour le partage de fichiers JSON.
+ */
+export function isShareSupported() {
+    if (typeof navigator === 'undefined' || typeof navigator.share !== 'function') return false;
+    if (typeof File === 'undefined') return false;
+    try {
+        const testFile = new File(['{}'], 'test.json', { type: 'application/json' });
+        return Boolean(navigator.canShare && navigator.canShare({ files: [testFile] }));
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Exporte la sauvegarde soit via le menu de partage natif de l'OS (Google Drive, Dropbox, Fichiers...),
+ * soit par téléchargement direct (fallback ou choix explicite).
+ * 
+ * @param {object} backupPayload 
+ * @param {{ forceDownload?: boolean }} options 
+ * @returns {Promise<{ method: 'share' | 'download', success: boolean, cancelled?: boolean }>}
+ */
+export async function exportBackup(backupPayload, { forceDownload = false } = {}) {
+    const jsonStr = JSON.stringify(backupPayload, null, 2);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const fileName = `proverbseed_backup_${dateStr}.json`;
+
+    if (!forceDownload && isShareSupported()) {
+        try {
+            const file = new File([jsonStr], fileName, { type: 'application/json' });
+            await navigator.share({
+                title: 'ProverbSeed Backup',
+                text: `Sauvegarde ProverbSeed du ${dateStr}`,
+                files: [file]
+            });
+            return { method: 'share', success: true };
+        } catch (err) {
+            if (err && err.name === 'AbortError') {
+                return { method: 'share', success: false, cancelled: true };
+            }
+            // En cas d'autre erreur de partage, fallback vers le téléchargement
+        }
+    }
+
+    if (typeof document !== 'undefined') {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+        const a = document.createElement('a');
+        a.setAttribute("href", dataStr);
+        a.setAttribute("download", fileName);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        return { method: 'download', success: true };
+    }
+
+    return { method: 'download', success: false };
+}
+
+/**
+ * Évalue si une sauvegarde est recommandée :
+ * - Vrai si l'utilisateur possède au moins un élément (totalItems > 0)
+ *   et qu'aucune sauvegarde n'a été faite ou que la dernière sauvegarde date de plus de `thresholdDays` jours.
+ */
+export function isBackupRecommended({ lastBackupDate = null, totalItems = 0, thresholdDays = 14 } = {}) {
+    if (!totalItems || totalItems <= 0) return false;
+    if (!lastBackupDate) return true;
+    const time = new Date(lastBackupDate).getTime();
+    if (isNaN(time)) return true;
+    const diffDays = (Date.now() - time) / (1000 * 60 * 60 * 24);
+    return diffDays >= thresholdDays;
+}
+
+/**
+ * Formate l'ancienneté de la dernière sauvegarde en texte lisible.
+ */
+export function formatLastBackupDate(lastBackupDate, t) {
+    if (!lastBackupDate) return null;
+    const time = new Date(lastBackupDate).getTime();
+    if (isNaN(time)) return null;
+    const diffDays = Math.floor((Date.now() - time) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) {
+        return t ? t('settings', 'aujourdhui') : "Aujourd'hui";
+    }
+    if (diffDays === 1) {
+        return t ? t('settings', 'hier') : 'Hier';
+    }
+    return t ? t('settings', 'ilYA').replace('{days}', diffDays.toString()) : `Il y a ${diffDays} jours`;
+}
+

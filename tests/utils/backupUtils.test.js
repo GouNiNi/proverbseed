@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { createBackupPayload, validateBackup } from '../../src/utils/backupUtils.js';
+import { createBackupPayload, validateBackup, isShareSupported, isBackupRecommended, formatLastBackupDate } from '../../src/utils/backupUtils.js';
 
 describe('backupUtils — Validation et création de sauvegarde (PRO-001)', () => {
     it('génère un payload de sauvegarde valide avec les métadonnées', () => {
@@ -78,3 +78,52 @@ describe('backupUtils — Validation et création de sauvegarde (PRO-001)', () =
         assert.throws(() => validateBackup({ proverbseed_backup: 'pas un objet' }), /propriété 'proverbseed_backup' manquante/);
     });
 });
+
+describe('backupUtils — Partage natif et rappel contextuel (PRO-012)', () => {
+    it('isShareSupported retourne false en environnement Node / sans navigator.share', () => {
+        assert.strictEqual(isShareSupported(), false);
+    });
+
+    it('isBackupRecommended évalue la nécessité d\'une sauvegarde selon l\'ancienneté et les données', () => {
+        // Aucune donnée créée -> pas de recommandation
+        assert.strictEqual(isBackupRecommended({ lastBackupDate: null, totalItems: 0 }), false);
+
+        // Des données créées mais jamais sauvegardé -> recommandation
+        assert.strictEqual(isBackupRecommended({ lastBackupDate: null, totalItems: 5 }), true);
+
+        // Sauvegarde récente (< 14 jours) -> pas de recommandation
+        const recentDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+        assert.strictEqual(isBackupRecommended({ lastBackupDate: recentDate, totalItems: 5, thresholdDays: 14 }), false);
+
+        // Sauvegarde ancienne (> 14 jours) -> recommandation
+        const oldDate = new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString();
+        assert.strictEqual(isBackupRecommended({ lastBackupDate: oldDate, totalItems: 5, thresholdDays: 14 }), true);
+
+        // Date invalide -> recommandation de sécurité
+        assert.strictEqual(isBackupRecommended({ lastBackupDate: 'date_invalide', totalItems: 2 }), true);
+    });
+
+    it('formatLastBackupDate formate correctement l\'ancienneté en texte lisible', () => {
+        const mockT = (sec, key) => {
+            const dict = {
+                aujourdhui: "Aujourd'hui",
+                hier: 'Hier',
+                ilYA: 'Il y a {days} jours'
+            };
+            return dict[key] || key;
+        };
+
+        assert.strictEqual(formatLastBackupDate(null, mockT), null);
+        assert.strictEqual(formatLastBackupDate('invalide', mockT), null);
+
+        const now = new Date().toISOString();
+        assert.strictEqual(formatLastBackupDate(now, mockT), "Aujourd'hui");
+
+        const yesterday = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+        assert.strictEqual(formatLastBackupDate(yesterday, mockT), 'Hier');
+
+        const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+        assert.strictEqual(formatLastBackupDate(fiveDaysAgo, mockT), 'Il y a 5 jours');
+    });
+});
+
