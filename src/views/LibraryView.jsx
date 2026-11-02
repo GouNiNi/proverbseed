@@ -3,7 +3,7 @@ import { dbStore, dbOptions, getAllProverbs } from '../data/db';
 import { ChevronRight, Trash2, Heart, Edit3, Search } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
-import { normalizeText } from '../utils/textUtils';
+import { normalizeText, groupThemesByLetter } from '../utils/textUtils';
 
 export default function LibraryView({ initialTheme = null, fromValidation = false, onBackToHome = null, onSelectTheme = null, onEditProverb }) {
     const language = useContext(LanguageContext);
@@ -91,6 +91,7 @@ export default function LibraryView({ initialTheme = null, fromValidation = fals
         await dbStore.setItem(dbOptions.USER_THEMES, newThemes);
         setThemes(newThemes);
         setCategorized(newCat);
+        backToThemes();
     };
 
     const toggleFavorite = async (proverbId) => {
@@ -101,42 +102,95 @@ export default function LibraryView({ initialTheme = null, fromValidation = fals
     };
 
     if (!selectedTheme) {
+        const groupedThemes = groupThemesByLetter(themes);
+
         return (
             <div className={`fade-enter ${isVisible ? 'fade-enter-active' : ''}`} style={{ paddingBottom: '40px' }}>
                 <h2 className="title-font" style={{ textAlign: 'center', fontSize: '2.5rem', marginBottom: '30px' }}>
                     {t('library', 'title')}
                 </h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div className="card" onClick={() => selectTheme('__favoris__')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '16px', borderLeft: '4px solid #d32f2f' }}>
-                        <div style={{ flex: 1 }}>
-                            <h3 style={{ margin: 0, color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Heart size={18} fill="#d32f2f" color="#d32f2f" />
-                                {t('library', 'favoris')} <span style={{ fontSize: '0.8rem', color: 'var(--color-supporting)', fontWeight: 'normal' }}>({favorites.length})</span>
-                            </h3>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {/* Carte des Favoris */}
+                    <div
+                        className="card"
+                        onClick={() => selectTheme('__favoris__')}
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            padding: '12px 14px',
+                            borderLeft: '4px solid #d32f2f',
+                            marginBottom: '16px'
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Heart size={18} fill="#d32f2f" color="#d32f2f" />
+                            <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)' }}>
+                                {t('library', 'favoris')}
+                            </span>
                         </div>
-                        <div style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center' }}>
-                            <ChevronRight size={20} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--color-supporting)', background: 'var(--color-bg, rgba(0,0,0,0.05))', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                                {favorites.length}
+                            </span>
+                            <ChevronRight size={18} style={{ color: 'var(--color-supporting)' }} />
                         </div>
                     </div>
 
-                    {themes.map(th => {
-                        const count = Object.keys(categorized).filter(id => categorized[id].includes(th)).length;
-                        return (
-                            <div key={th} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '16px' }}>
-                                <div onClick={() => selectTheme(th)} style={{ flex: 1 }}>
-                                    <h3 style={{ margin: 0, color: 'var(--color-text)' }}>{th} <span style={{ fontSize: '0.8rem', color: 'var(--color-supporting)', fontWeight: 'normal' }}>({count})</span></h3>
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px', zIndex: 10 }}>
-                                    <button onClick={() => deleteTheme(th)} style={{ color: 'var(--color-supporting)', padding: '5px' }} aria-label="Delete"><Trash2 size={18} /></button>
-                                    <div style={{ color: 'var(--color-primary)', display: 'flex', alignItems: 'center' }} onClick={() => selectTheme(th)}>
-                                        <ChevronRight size={20} />
-                                    </div>
-                                </div>
+                    {/* Liste groupée par lettre alphabétique */}
+                    {groupedThemes.map(({ letter, themes: themeList }) => (
+                        <div key={letter} style={{ marginBottom: '16px' }}>
+                            <div style={{
+                                fontSize: '0.82rem',
+                                fontWeight: '700',
+                                color: 'var(--color-primary)',
+                                letterSpacing: '1.5px',
+                                textTransform: 'uppercase',
+                                padding: '4px 6px',
+                                marginBottom: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}>
+                                <span>{letter}</span>
+                                <div style={{ flex: 1, height: '1px', background: 'var(--color-border, rgba(0,0,0,0.08))', opacity: 0.5 }} />
                             </div>
-                        );
-                    })}
+                            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                                {themeList.map((th, idx) => {
+                                    const count = Object.keys(categorized).filter(id => categorized[id].includes(th)).length;
+                                    return (
+                                        <div
+                                            key={th}
+                                            onClick={() => selectTheme(th)}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                cursor: 'pointer',
+                                                padding: '11px 14px',
+                                                borderBottom: idx < themeList.length - 1 ? '1px solid var(--color-border, rgba(0,0,0,0.06))' : 'none',
+                                                transition: 'background-color 0.15s ease'
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '0.95rem', color: 'var(--color-text)', fontWeight: 500 }}>
+                                                {th}
+                                            </span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ fontSize: '0.75rem', color: 'var(--color-supporting)', background: 'var(--color-bg, rgba(0,0,0,0.05))', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                                                    {count}
+                                                </span>
+                                                <ChevronRight size={16} style={{ color: 'var(--color-supporting)' }} />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+
                     {themes.length === 0 && (
-                        <p style={{ textAlign: 'center', color: 'var(--color-supporting)', marginTop: '10px', fontSize: '0.9rem' }}>
+                        <p style={{ textAlign: 'center', color: 'var(--color-supporting)', marginTop: '20px', fontSize: '0.9rem' }}>
                             {t('library', 'aucunTheme')}
                         </p>
                     )}
@@ -156,9 +210,30 @@ export default function LibraryView({ initialTheme = null, fromValidation = fals
 
     return (
         <div className={`fade-enter ${isVisible ? 'fade-enter-active' : ''}`} style={{ paddingBottom: '40px' }}>
-            <button className="btn-ghost" onClick={handleBack} style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', color: 'var(--color-secondary)' }}>
-                {fromValidation ? t('library', 'retourAccueil') : t('library', 'retourThemes')}
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <button className="btn-ghost" onClick={handleBack} style={{ display: 'flex', alignItems: 'center', color: 'var(--color-secondary)', padding: '6px 0' }}>
+                    {fromValidation ? t('library', 'retourAccueil') : t('library', 'retourThemes')}
+                </button>
+                {selectedTheme !== '__favoris__' && (
+                    <button
+                        className="btn-ghost"
+                        onClick={() => deleteTheme(selectedTheme)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            color: 'var(--color-supporting)',
+                            fontSize: '0.85rem',
+                            padding: '6px 8px'
+                        }}
+                        aria-label={t('library', 'supprimer')}
+                        title={t('library', 'supprimer')}
+                    >
+                        <Trash2 size={16} />
+                        <span>{t('library', 'supprimer')}</span>
+                    </button>
+                )}
+            </div>
 
             <h2 className="title-font" style={{ textAlign: 'center', fontSize: '2.5rem', marginBottom: '20px' }}>{displayTitle}</h2>
 

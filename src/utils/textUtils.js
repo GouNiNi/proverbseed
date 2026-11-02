@@ -71,3 +71,44 @@ export function resolveTagWithExisting(inputVal = '', allThemes = []) {
 
     return exactMatch || trimmed;
 }
+
+/**
+ * Retourne la lettre de section majuscule (A-Z) pour un nom de thème,
+ * insensible aux accents (ex: "Éducation" -> "E", "Âme" -> "A").
+ * Renvoie '#' si le premier caractère n'est pas une lettre.
+ * 
+ * @param {string} themeName
+ * @returns {string}
+ */
+export function getThemeFirstLetter(themeName = '') {
+    if (!themeName || typeof themeName !== 'string') return '#';
+    const norm = normalizeText(themeName.trim());
+    if (!norm) return '#';
+    const firstChar = norm[0].toUpperCase();
+    return (firstChar >= 'A' && firstChar <= 'Z') ? firstChar : '#';
+}
+
+/**
+ * Regroupe une liste ordonnée de thèmes par leur lettre de section alphabétique.
+ * Préserve l'ordre initial des thèmes au sein de chaque groupe.
+ * 
+ * @param {Array<string>} themes
+ * @returns {Array<{ letter: string, themes: string[] }>}
+ */
+export function groupThemesByLetter(themes = []) {
+    if (!Array.isArray(themes)) return [];
+    const groupsMap = new Map();
+    for (const th of themes) {
+        if (!th) continue;
+        const letter = getThemeFirstLetter(th);
+        if (!groupsMap.has(letter)) {
+            groupsMap.set(letter, []);
+        }
+        groupsMap.get(letter).push(th);
+    }
+    return Array.from(groupsMap.entries()).map(([letter, thList]) => ({
+        letter,
+        themes: thList
+    }));
+}
+

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { normalizeText, filterAndSortTagSuggestions, resolveTagWithExisting } from '../../src/utils/textUtils.js';
+import { normalizeText, filterAndSortTagSuggestions, resolveTagWithExisting, getThemeFirstLetter, groupThemesByLetter } from '../../src/utils/textUtils.js';
 
 describe('textUtils — normalizeText', () => {
     it('gère les entrées vides, null ou undefined', () => {
@@ -103,5 +103,63 @@ describe('textUtils — resolveTagWithExisting', () => {
     it('gère les chaînes vides', () => {
         assert.strictEqual(resolveTagWithExisting('', allThemes), '');
         assert.strictEqual(resolveTagWithExisting('   ', allThemes), '');
+    });
+});
+
+describe('textUtils — getThemeFirstLetter', () => {
+    it('détermine la lettre majuscule de section insensible aux accents', () => {
+        assert.strictEqual(getThemeFirstLetter('École'), 'E');
+        assert.strictEqual(getThemeFirstLetter('école'), 'E');
+        assert.strictEqual(getThemeFirstLetter('Éducation'), 'E');
+        assert.strictEqual(getThemeFirstLetter('Âme'), 'A');
+        assert.strictEqual(getThemeFirstLetter('amour'), 'A');
+        assert.strictEqual(getThemeFirstLetter('Île'), 'I');
+        assert.strictEqual(getThemeFirstLetter('Vérité'), 'V');
+        assert.strictEqual(getThemeFirstLetter('zèbre'), 'Z');
+    });
+
+    it('gère les espaces et caractères spéciaux en début de chaîne', () => {
+        assert.strictEqual(getThemeFirstLetter('   Sagesse'), 'S');
+        assert.strictEqual(getThemeFirstLetter('123 Thème'), '#');
+        assert.strictEqual(getThemeFirstLetter(''), '#');
+        assert.strictEqual(getThemeFirstLetter(null), '#');
+    });
+});
+
+describe('textUtils — groupThemesByLetter (PRO-011)', () => {
+    it('regroupe les thèmes triés sous leur lettre de base respective', () => {
+        const sortedThemes = [
+            'action',
+            'Âme',
+            'amour',
+            'eau',
+            'École',
+            'Éducation',
+            'effort',
+            'Vérité',
+            'zèbre'
+        ];
+
+        const grouped = groupThemesByLetter(sortedThemes);
+
+        assert.strictEqual(grouped.length, 4);
+
+        assert.strictEqual(grouped[0].letter, 'A');
+        assert.deepStrictEqual(grouped[0].themes, ['action', 'Âme', 'amour']);
+
+        assert.strictEqual(grouped[1].letter, 'E');
+        assert.deepStrictEqual(grouped[1].themes, ['eau', 'École', 'Éducation', 'effort']);
+
+        assert.strictEqual(grouped[2].letter, 'V');
+        assert.deepStrictEqual(grouped[2].themes, ['Vérité']);
+
+        assert.strictEqual(grouped[3].letter, 'Z');
+        assert.deepStrictEqual(grouped[3].themes, ['zèbre']);
+    });
+
+    it('gère les entrées vides ou invalides', () => {
+        assert.deepStrictEqual(groupThemesByLetter([]), []);
+        assert.deepStrictEqual(groupThemesByLetter(null), []);
+        assert.deepStrictEqual(groupThemesByLetter(undefined), []);
     });
 });
