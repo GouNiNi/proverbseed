@@ -3,6 +3,7 @@ import { dbStore, dbOptions } from '../data/db';
 import { Download, Upload } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
+import { createBackupPayload, validateBackup } from '../utils/backupUtils';
 
 export default function SettingsView() {
     const language = useContext(LanguageContext);
@@ -167,11 +168,14 @@ export default function SettingsView() {
             const stats = await dbStore.getItem(dbOptions.USER_STATS) || {};
             const set = await dbStore.getItem(dbOptions.SETTINGS) || {};
 
-            const exportData = {
-                version: "1.1",
-                date: new Date().toISOString(),
-                proverbseed_backup: { user_themes: themes, categorized_proverbs: cat, favorites: fav, meditation_notes: notes, user_stats: stats, settings: set }
-            };
+            const exportData = createBackupPayload({
+                user_themes: themes,
+                categorized_proverbs: cat,
+                favorites: fav,
+                meditation_notes: notes,
+                user_stats: stats,
+                settings: set
+            });
 
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
             const a = document.createElement('a');
@@ -193,16 +197,15 @@ export default function SettingsView() {
         try {
             const text = await file.text();
             const json = JSON.parse(text);
-            if (!json.proverbseed_backup) throw new Error('Invalid file format');
+            const backup = validateBackup(json);
             if (!window.confirm(t('settings', 'importConfirm'))) return;
 
-            const backup = json.proverbseed_backup;
-            await dbStore.setItem(dbOptions.USER_THEMES, backup.user_themes || []);
-            await dbStore.setItem(dbOptions.CATEGORIZED_PROVERBS, backup.categorized_proverbs || {});
-            await dbStore.setItem(dbOptions.FAVORITES, backup.favorites || []);
-            await dbStore.setItem(dbOptions.MEDITATION_NOTES, backup.meditation_notes || {});
-            await dbStore.setItem(dbOptions.USER_STATS, backup.user_stats || {});
-            await dbStore.setItem(dbOptions.SETTINGS, backup.settings || {});
+            await dbStore.setItem(dbOptions.USER_THEMES, backup.user_themes);
+            await dbStore.setItem(dbOptions.CATEGORIZED_PROVERBS, backup.categorized_proverbs);
+            await dbStore.setItem(dbOptions.FAVORITES, backup.favorites);
+            await dbStore.setItem(dbOptions.MEDITATION_NOTES, backup.meditation_notes);
+            await dbStore.setItem(dbOptions.USER_STATS, backup.user_stats);
+            await dbStore.setItem(dbOptions.SETTINGS, backup.settings);
             alert(t('settings', 'importSuccess'));
             window.location.reload();
         } catch (err) {
