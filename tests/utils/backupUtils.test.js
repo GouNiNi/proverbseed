@@ -1,6 +1,15 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { createBackupPayload, validateBackup, isShareSupported, isBackupRecommended, formatLastBackupDate } from '../../src/utils/backupUtils.js';
+import {
+    createBackupPayload,
+    validateBackup,
+    isSaveFilePickerSupported,
+    isShareSupported,
+    isCloudOrSystemSaveSupported,
+    exportBackup,
+    isBackupRecommended,
+    formatLastBackupDate
+} from '../../src/utils/backupUtils.js';
 
 describe('backupUtils — Validation et création de sauvegarde (PRO-001)', () => {
     it('génère un payload de sauvegarde valide avec les métadonnées', () => {
@@ -80,8 +89,97 @@ describe('backupUtils — Validation et création de sauvegarde (PRO-001)', () =
 });
 
 describe('backupUtils — Partage natif et rappel contextuel (PRO-012)', () => {
+    it('isSaveFilePickerSupported retourne false en environnement Node / sans window.showSaveFilePicker', () => {
+        assert.strictEqual(isSaveFilePickerSupported(), false);
+    });
+
     it('isShareSupported retourne false en environnement Node / sans navigator.share', () => {
         assert.strictEqual(isShareSupported(), false);
+    });
+
+    it('isCloudOrSystemSaveSupported détecte la présence de picker ou share', () => {
+        assert.strictEqual(isCloudOrSystemSaveSupported(), false);
+    });
+
+    it('exportBackup sauvegarde avec showSaveFilePicker lorsque supporté', async () => {
+        let writtenContent = null;
+        let closed = false;
+
+        global.window = {
+            showSaveFilePicker: async (options) => {
+                assert.ok(options.suggestedName.startsWith('proverbseed_backup_'));
+                return {
+                    createWritable: async () => ({
+                        write: async (content) => { writtenContent = content; },
+                        close: async () => { closed = true; }
+                    })
+                };
+            }
+        };
+
+        try {
+            const payload = createBackupPayload({ user_themes: ['Test'] });
+            const result = await exportBackup(payload);
+
+            assert.strictEqual(result.method, 'picker');
+            assert.strictEqual(result.success, true);
+            assert.ok(writtenContent && writtenContent.includes('Test'));
+            assert.strictEqual(closed, true);
+        } finally {
+            delete global.window;
+        }
+    });
+
+    it('exportBackup gère l\'annulation utilisateur dans showSaveFilePicker', async () => {
+        global.window = {
+            showSaveFilePicker: async () => {
+                const err = new Error('The user aborted a request.');
+                err.name = 'AbortError';
+                throw err;
+            }
+        };
+
+        try {
+            const payload = createBackupPayload();
+            const result = await exportBackup(payload);
+
+            assert.strictEqual(result.method, 'picker');
+            assert.strictEqual(result.success, false);
+            assert.strictEqual(result.cancelled, true);
+        } finally {
+            delete global.window;
+        }
+    });
+
+    it('exportBackup bascule sur navigator.share si showSaveFilePicker n\'est pas disponible', async () => {
+        let sharedData = null;
+
+        global.navigator = {
+            share: async (data) => {
+                sharedData = data;
+            },
+            canShare: () => true
+        };
+        global.File = class MockFile {
+            constructor(parts, name, opts) {
+                this.parts = parts;
+                this.name = name;
+                this.opts = opts;
+            }
+        };
+
+        try {
+            const payload = createBackupPayload({ user_themes: ['Partage'] });
+            const result = await exportBackup(payload);
+
+            assert.strictEqual(result.method, 'share');
+            assert.strictEqual(result.success, true);
+            assert.ok(sharedData.files && sharedData.files.length === 1);
+            assert.strictEqual(sharedData.title, 'ProverbSeed Backup');
+        } finally {
+            delete global.navigator;
+            delete global.File;
+        }
     });
 
     it('isBackupRecommended évalue la nécessité d\'une sauvegarde selon l\'ancienneté et les données', () => {
@@ -126,4 +224,3 @@ describe('backupUtils — Partage natif et rappel contextuel (PRO-012)', () => {
         assert.strictEqual(formatLastBackupDate(fiveDaysAgo, mockT), 'Il y a 5 jours');
     });
 });
-

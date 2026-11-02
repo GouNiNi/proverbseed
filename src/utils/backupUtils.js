@@ -1,5 +1,5 @@
 /**
- * Utilitaires d'exportation, d'importation et de validation de schéma de sauvegarde ProverbSeed (PRO-001).
+ * Utilitaires d'exportation, d'importation et de validation de schéma de sauvegarde ProverbSeed (PRO-001 & PRO-012).
  */
 
 /**
@@ -87,6 +87,14 @@ export function validateBackup(json) {
 }
 
 /**
+ * Vérifie si l'API File System Access (showSaveFilePicker) est disponible.
+ * Permet à l'utilisateur de choisir l'emplacement de destination exact (Google Drive monté, etc.).
+ */
+export function isSaveFilePickerSupported() {
+    return typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function';
+}
+
+/**
  * Vérifie si la Web Share API est supportée pour le partage de fichiers JSON.
  */
 export function isShareSupported() {
@@ -101,44 +109,96 @@ export function isShareSupported() {
 }
 
 /**
- * Exporte la sauvegarde soit via le menu de partage natif de l'OS (Google Drive, Dropbox, Fichiers...),
- * soit par téléchargement direct (fallback ou choix explicite).
+ * Détermine si au moins un moyen de sauvegarde interactif (sélecteur de fichier ou partage OS) est disponible.
+ */
+export function isCloudOrSystemSaveSupported() {
+    return isSaveFilePickerSupported() || isShareSupported();
+}
+
+/**
+ * Exporte la sauvegarde :
+ * 1. En priorité via showSaveFilePicker (si supporté) pour choisir l'emplacement exact (Drive, dossier, etc.).
+ * 2. En relais via navigator.share (Web Share API) pour ouvrir la feuille de partage OS ("Enregistrer dans Drive").
+ * 3. En téléchargement direct si forceDownload est vrai ou si aucune API interactive n'est supportée.
  * 
  * @param {object} backupPayload 
  * @param {{ forceDownload?: boolean }} options 
- * @returns {Promise<{ method: 'share' | 'download', success: boolean, cancelled?: boolean }>}
+ * @returns {Promise<{ method: 'picker' | 'share' | 'download', success: boolean, cancelled?: boolean, error?: string }>}
  */
 export async function exportBackup(backupPayload, { forceDownload = false } = {}) {
     const jsonStr = JSON.stringify(backupPayload, null, 2);
     const dateStr = new Date().toISOString().slice(0, 10);
     const fileName = `proverbseed_backup_${dateStr}.json`;
 
-    if (!forceDownload && isShareSupported()) {
-        try {
-            const file = new File([jsonStr], fileName, { type: 'application/json' });
-            await navigator.share({
-                title: 'ProverbSeed Backup',
-                text: `Sauvegarde ProverbSeed du ${dateStr}`,
-                files: [file]
-            });
-            return { method: 'share', success: true };
-        } catch (err) {
-            if (err && err.name === 'AbortError') {
-                return { method: 'share', success: false, cancelled: true };
+    // 1. Sauvegarde interactive (Picker de fichiers OS ou Partage natif Cloud)
+    if (!forceDownload) {
+        // A. File System Access API (permet de choisir l'emplacement exact dans Google Drive ou sur le disque)
+        if (isSaveFilePickerSupported()) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: fileName,
+                    types: [{
+                        description: 'Sauvegarde ProverbSeed (JSON)',
+                        accept: { 'application/json': ['.json'] }
+                    }]
+                });
+                const writable = await handle.createWritable();
+                await writable.write(jsonStr);
+                await writable.close();
+                return { method: 'picker', success: true };
+            } catch (err) {
+                if (err && err.name === 'AbortError') {
+                    return { method: 'picker', success: false, cancelled: true };
+                }
+                // Si showSaveFilePicker échoue (ex: non supporté sur ce contexte), tenter le partage natif ci-dessous
+                console.warn('showSaveFilePicker a échoué, essai avec le partage natif:', err);
             }
-            // En cas d'autre erreur de partage, fallback vers le téléchargement
+        }
+
+        // B. Web Share API (ouvre la feuille de partage OS avec l'option "Enregistrer dans Drive", "Fichiers", etc.)
+        if (isShareSupported()) {
+            try {
+                const file = new File([jsonStr], fileName, { type: 'application/json' });
+                await navigator.share({
+                    title: 'ProverbSeed Backup',
+                    text: `Sauvegarde ProverbSeed du ${dateStr}`,
+                    files: [file]
+                });
+                return { method: 'share', success: true };
+            } catch (err) {
+                if (err && err.name === 'AbortError') {
+                    return { method: 'share', success: false, cancelled: true };
+                }
+                console.error('Erreur lors du partage système:', err);
+                return { method: 'share', success: false, error: err?.message || 'Erreur inconnue' };
+            }
         }
     }
 
+    // 2. Téléchargement direct (choisi explicitement via Télécharger ou si aucune API moderne n'est disponible)
     if (typeof document !== 'undefined') {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
-        const a = document.createElement('a');
-        a.setAttribute("href", dataStr);
-        a.setAttribute("download", fileName);
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        return { method: 'download', success: true };
+        try {
+            const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute("href", url);
+            a.setAttribute("download", fileName);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return { method: 'download', success: true };
+        } catch (err) {
+            // Repli sur data: URI si createObjectURL échoue
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+            const a = document.createElement('a');
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", fileName);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            return { method: 'download', success: true };
+        }
     }
 
     return { method: 'download', success: false };
@@ -174,4 +234,3 @@ export function formatLastBackupDate(lastBackupDate, t) {
     }
     return t ? t('settings', 'ilYA').replace('{days}', diffDays.toString()) : `Il y a ${diffDays} jours`;
 }
-

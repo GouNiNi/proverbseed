@@ -3,13 +3,14 @@ import { dbStore, dbOptions } from '../data/db';
 import { Download, Upload, Share2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
-import { createBackupPayload, validateBackup, exportBackup, isShareSupported, isBackupRecommended, formatLastBackupDate } from '../utils/backupUtils';
+import { createBackupPayload, validateBackup, exportBackup, isCloudOrSystemSaveSupported, isBackupRecommended, formatLastBackupDate } from '../utils/backupUtils';
 
 export default function SettingsView() {
     const language = useContext(LanguageContext);
     const t = useT();
 
     const fileInputRef = useRef(null);
+    const backupPayloadRef = useRef(null);
     const [settings, setSettings] = useState({
         language: 'fr',
         categorizationAid: false,
@@ -25,6 +26,32 @@ export default function SettingsView() {
 
     const DAYS_VALUES = [1, 2, 3, 4, 5, 6, 0];
 
+    const refreshBackupData = async () => {
+        try {
+            const [themes, cat, fav, notes, stats, set] = await Promise.all([
+                dbStore.getItem(dbOptions.USER_THEMES) || [],
+                dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {},
+                dbStore.getItem(dbOptions.FAVORITES) || [],
+                dbStore.getItem(dbOptions.MEDITATION_NOTES) || {},
+                dbStore.getItem(dbOptions.USER_STATS) || {},
+                dbStore.getItem(dbOptions.SETTINGS) || {}
+            ]);
+            const payload = createBackupPayload({
+                user_themes: themes,
+                categorized_proverbs: cat,
+                favorites: fav,
+                meditation_notes: notes,
+                user_stats: stats,
+                settings: set
+            });
+            backupPayloadRef.current = payload;
+            return payload;
+        } catch (err) {
+            console.error('Erreur refresh backup:', err);
+            return null;
+        }
+    };
+
     useEffect(() => {
         Promise.all([
             dbStore.getItem(dbOptions.SETTINGS),
@@ -32,10 +59,19 @@ export default function SettingsView() {
             dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS),
             dbStore.getItem(dbOptions.FAVORITES),
             dbStore.getItem(dbOptions.MEDITATION_NOTES),
-        ]).then(([dbSettings, themes, cat, fav, notes]) => {
+            dbStore.getItem(dbOptions.USER_STATS),
+        ]).then(([dbSettings, themes, cat, fav, notes, stats]) => {
             if (dbSettings) setSettings(dbSettings);
             const total = (themes || []).length + Object.keys(cat || {}).length + (fav || []).length + Object.keys(notes || {}).length;
             setTotalDataItems(total);
+            backupPayloadRef.current = createBackupPayload({
+                user_themes: themes || [],
+                categorized_proverbs: cat || {},
+                favorites: fav || [],
+                meditation_notes: notes || {},
+                user_stats: stats || {},
+                settings: dbSettings || {}
+            });
             setLoading(false);
         });
     }, []);
@@ -43,6 +79,9 @@ export default function SettingsView() {
     const updateSetting = async (key, value) => {
         const newSettings = { ...settings, [key]: value };
         setSettings(newSettings);
+        if (backupPayloadRef.current?.proverbseed_backup) {
+            backupPayloadRef.current.proverbseed_backup.settings = newSettings;
+        }
         await dbStore.setItem(dbOptions.SETTINGS, newSettings);
         if (key === 'language') {
             window.dispatchEvent(new CustomEvent('languageChange', { detail: value }));
@@ -170,21 +209,12 @@ export default function SettingsView() {
 
     const handleExport = async (forceDownload = false) => {
         try {
-            const themes = await dbStore.getItem(dbOptions.USER_THEMES) || [];
-            const cat = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
-            const fav = await dbStore.getItem(dbOptions.FAVORITES) || [];
-            const notes = await dbStore.getItem(dbOptions.MEDITATION_NOTES) || {};
-            const stats = await dbStore.getItem(dbOptions.USER_STATS) || {};
-            const set = await dbStore.getItem(dbOptions.SETTINGS) || {};
-
-            const exportData = createBackupPayload({
-                user_themes: themes,
-                categorized_proverbs: cat,
-                favorites: fav,
-                meditation_notes: notes,
-                user_stats: stats,
-                settings: set
-            });
+            // Utiliser immédiatement les données en mémoire si disponibles pour préserver le geste utilisateur
+            const exportData = backupPayloadRef.current || await refreshBackupData();
+            if (!exportData) {
+                alert(t('settings', 'exportError'));
+                return;
+            }
 
             const result = await exportBackup(exportData, { forceDownload });
             if (result.cancelled) {
@@ -230,7 +260,7 @@ export default function SettingsView() {
     if (loading) return <div></div>;
 
     const days = t('settings', 'days');
-    const shareAvailable = isShareSupported();
+    const shareAvailable = isCloudOrSystemSaveSupported();
     const backupRecommended = isBackupRecommended({
         lastBackupDate: settings.lastBackupDate,
         totalItems: totalDataItems,
