@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node --test tests/*.test.js",
+    "test": "node --test",
     "preview": "vite preview",
     "bump-version": "node scripts/bump-version.js",
     "deploy": "git push origin HEAD:main && git -C /Users/gounini/Documents/proverbseed pull origin main --quiet"

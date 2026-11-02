@@ -24,7 +24,7 @@ export function normalizeText(str) {
  * @returns {Array<string>}
  */
 export function filterAndSortTagSuggestions(allThemes = [], query = '', currentThemes = [], maxResults = 5) {
-    const normQuery = normalizeText(query.trim());
+    const normQuery = normalizeText((query || '').trim());
     if (!normQuery) return [];
 
     // Exclure les thèmes déjà appliqués

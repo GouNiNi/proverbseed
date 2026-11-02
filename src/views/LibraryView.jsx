@@ -22,7 +22,7 @@ export default function LibraryView({ initialTheme = null, fromValidation = fals
         const th = await dbStore.getItem(dbOptions.USER_THEMES) || [];
         const cat = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
         const fav = await dbStore.getItem(dbOptions.FAVORITES) || [];
-        setThemes(th.sort());
+        setThemes(th.sort((a, b) => a.localeCompare(b, language === 'fr' ? 'fr' : 'en')));
         setCategorized(cat);
         setFavorites(fav);
         setTimeout(() => setIsVisible(true), 50);
