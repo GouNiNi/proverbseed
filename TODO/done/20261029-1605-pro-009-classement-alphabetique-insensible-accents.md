@@ -2,7 +2,7 @@
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
-- **Statut** : tovalidate
+- **Statut** : done
 
 ## Contexte & Objectif
 Dans la bibliothèque de thèmes, les mots commençant par une lettre accentuée (ex. « Éducation », « École », « Âme ») étaient triés selon l'ordre brut UTF-16 et apparaissaient tout à la fin de la liste, après la lettre Z.
