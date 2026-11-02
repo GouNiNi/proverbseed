@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { dbStore, dbOptions } from '../data/db';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, Share2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { LanguageContext } from '../i18n/LanguageContext';
 import { useT } from '../i18n/LanguageContext';
-import { createBackupPayload, validateBackup } from '../utils/backupUtils';
+import { createBackupPayload, validateBackup, exportBackup, isShareSupported, isBackupRecommended, formatLastBackupDate } from '../utils/backupUtils';
 
 export default function SettingsView() {
     const language = useContext(LanguageContext);
@@ -21,12 +21,21 @@ export default function SettingsView() {
         notificationDays: [1, 2, 3, 4, 5, 6, 0],
     });
     const [loading, setLoading] = useState(true);
+    const [totalDataItems, setTotalDataItems] = useState(0);
 
     const DAYS_VALUES = [1, 2, 3, 4, 5, 6, 0];
 
     useEffect(() => {
-        dbStore.getItem(dbOptions.SETTINGS).then((dbSettings) => {
+        Promise.all([
+            dbStore.getItem(dbOptions.SETTINGS),
+            dbStore.getItem(dbOptions.USER_THEMES),
+            dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS),
+            dbStore.getItem(dbOptions.FAVORITES),
+            dbStore.getItem(dbOptions.MEDITATION_NOTES),
+        ]).then(([dbSettings, themes, cat, fav, notes]) => {
             if (dbSettings) setSettings(dbSettings);
+            const total = (themes || []).length + Object.keys(cat || {}).length + (fav || []).length + Object.keys(notes || {}).length;
+            setTotalDataItems(total);
             setLoading(false);
         });
     }, []);
@@ -159,7 +168,7 @@ export default function SettingsView() {
         updateSetting('notificationDays', newDays);
     };
 
-    const handleExport = async () => {
+    const handleExport = async (forceDownload = false) => {
         try {
             const themes = await dbStore.getItem(dbOptions.USER_THEMES) || [];
             const cat = await dbStore.getItem(dbOptions.CATEGORIZED_PROVERBS) || {};
@@ -177,14 +186,18 @@ export default function SettingsView() {
                 settings: set
             });
 
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
-            const a = document.createElement('a');
-            a.setAttribute("href", dataStr);
-            a.setAttribute("download", `proverbseed_backup_${new Date().toISOString().slice(0, 10)}.json`);
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            alert(t('settings', 'exportSuccess'));
+            const result = await exportBackup(exportData, { forceDownload });
+            if (result.cancelled) {
+                return;
+            }
+
+            if (result.success) {
+                const now = new Date().toISOString();
+                await updateSetting('lastBackupDate', now);
+                alert(t('settings', 'exportSuccess'));
+            } else {
+                alert(t('settings', 'exportError'));
+            }
         } catch (err) {
             console.error(err);
             alert(t('settings', 'exportError'));
@@ -217,6 +230,13 @@ export default function SettingsView() {
     if (loading) return <div></div>;
 
     const days = t('settings', 'days');
+    const shareAvailable = isShareSupported();
+    const backupRecommended = isBackupRecommended({
+        lastBackupDate: settings.lastBackupDate,
+        totalItems: totalDataItems,
+        thresholdDays: 14
+    });
+    const lastBackupFormatted = formatLastBackupDate(settings.lastBackupDate, t);
 
     return (
         <div className="fade-enter fade-enter-active" style={{ paddingBottom: '40px' }}>
@@ -368,17 +388,92 @@ export default function SettingsView() {
                 {t('settings', 'sauvegarde')}
             </h3>
 
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', textAlign: 'center' }}>
-                <p style={{ color: 'var(--color-supporting)', fontSize: '0.9rem' }}>
+            <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'stretch' }}>
+                <p style={{ color: 'var(--color-supporting)', fontSize: '0.9rem', textAlign: 'center', margin: 0 }}>
                     {t('settings', 'sauvegardeDesc')}
                 </p>
-                <div style={{ display: 'flex', gap: '15px', width: '100%', justifyContent: 'center' }}>
-                    <button className="btn-secondary" onClick={handleExport} style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}>
-                        <Download size={18} /> {t('settings', 'exporter')}
-                    </button>
-                    <button className="btn-secondary" onClick={() => fileInputRef.current.click()} style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}>
-                        <Upload size={18} /> {t('settings', 'importer')}
-                    </button>
+
+                {/* Statut de dernière sauvegarde & rappel contextuel */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    background: backupRecommended ? 'rgba(217, 119, 6, 0.08)' : 'var(--color-bg, rgba(0,0,0,0.03))',
+                    border: backupRecommended ? '1px solid rgba(217, 119, 6, 0.3)' : '1px solid var(--color-border, rgba(0,0,0,0.06))',
+                    fontSize: '0.85rem'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {backupRecommended ? (
+                            <AlertCircle size={16} color="#d97706" />
+                        ) : (
+                            <CheckCircle2 size={16} color="var(--color-primary)" />
+                        )}
+                        <span style={{ color: 'var(--color-text)' }}>
+                            <strong>{t('settings', 'derniereSauvegarde')}</strong>{' '}
+                            {lastBackupFormatted || t('settings', 'jamaisSauvegarde')}
+                        </span>
+                    </div>
+                    {backupRecommended && (
+                        <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 600,
+                            color: '#d97706',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                        }}>
+                            {t('settings', 'sauvegardeRecommandee')}
+                        </span>
+                    )}
+                </div>
+
+                {/* Boutons d'action : Partage natif cloud / Télécharger / Importer */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                    {shareAvailable ? (
+                        <>
+                            <button
+                                className="btn-primary"
+                                onClick={() => handleExport(false)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', width: '100%', padding: '12px', fontSize: '0.95rem' }}
+                            >
+                                <Share2 size={18} /> {t('settings', 'partagerCloud')}
+                            </button>
+                            <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                                <button
+                                    className="btn-secondary"
+                                    onClick={() => handleExport(true)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center', fontSize: '0.85rem' }}
+                                >
+                                    <Download size={16} /> {t('settings', 'telecharger')}
+                                </button>
+                                <button
+                                    className="btn-secondary"
+                                    onClick={() => fileInputRef.current.click()}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center', fontSize: '0.85rem' }}
+                                >
+                                    <Upload size={16} /> {t('settings', 'importer')}
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                            <button
+                                className="btn-secondary"
+                                onClick={() => handleExport(true)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}
+                            >
+                                <Download size={18} /> {t('settings', 'exporter')}
+                            </button>
+                            <button
+                                className="btn-secondary"
+                                onClick={() => fileInputRef.current.click()}
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}
+                            >
+                                <Upload size={18} /> {t('settings', 'importer')}
+                            </button>
+                        </div>
+                    )}
                 </div>
                 <input type="file" accept=".json,application/json,application/*,text/*" ref={fileInputRef} style={{ display: 'none' }} onChange={handleImport} />
             </div>
