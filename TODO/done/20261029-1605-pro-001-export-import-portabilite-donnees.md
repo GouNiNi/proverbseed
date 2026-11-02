@@ -2,7 +2,7 @@
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Haute
-- **Statut** : tovalidate
+- **Statut** : done
 - **Code Legacy** : PRO-001
 
 ## Contexte & Objectif

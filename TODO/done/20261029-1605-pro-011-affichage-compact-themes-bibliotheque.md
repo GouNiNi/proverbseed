@@ -2,7 +2,7 @@
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Basse
-- **Statut** : tovalidate
+- **Statut** : done
 
 ## Contexte & Objectif
 Offrir une vue d'ensemble plus dense et agréable des étiquettes/thèmes dans la Bibliothèque pour limiter les besoins de défilement, tout en facilitant le repérage alphabétique.
