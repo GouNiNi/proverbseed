@@ -1,9 +1,8 @@
-# [PRO-002] Gestion des Favoris
+# Gestion des Favoris
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
 - **Statut** : done
-- **Code Legacy** : PRO-002
 
 ## Contexte & Réalisation
 Permettre le marquage des proverbes en favoris et créer la section dédiée dans la bibliothèque.

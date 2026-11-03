@@ -1,9 +1,8 @@
-# [PRO-008] Gestion du bouton Retour physique / système
+# Gestion du bouton Retour physique / système
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
 - **Statut** : done
-- **Code Legacy** : PRO-008
 
 ## Contexte & Réalisation
 Interception de l'événement `popstate` et synchroniser des fragments d'URL (`#home`, `#library`, `#library/<theme>`, `#settings`) pour la navigation physique/système Android & PWA.

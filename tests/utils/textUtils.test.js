@@ -126,7 +126,7 @@ describe('textUtils — getThemeFirstLetter', () => {
     });
 });
 
-describe('textUtils — groupThemesByLetter (PRO-011)', () => {
+describe('textUtils — groupThemesByLetter', () => {
     it('regroupe les thèmes triés sous leur lettre de base respective', () => {
         const sortedThemes = [
             'action',

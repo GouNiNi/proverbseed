@@ -1,9 +1,8 @@
-# [PRO-005] Désactivation du remplissage automatique (Android)
+# Désactivation du remplissage automatique (Android)
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
 - **Statut** : done
-- **Code Legacy** : PRO-005
 
 ## Contexte & Réalisation
 Attributs HTML optimisés (`autoComplete`, `readOnly` au focus) + Désactivation du service de saisie automatique Chrome/Android.

@@ -1,9 +1,8 @@
-# [PRO-006] Suggestions d'étiquettes insensibles aux accents et à la casse
+# Suggestions d'étiquettes insensibles aux accents et à la casse
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
 - **Statut** : done
-- **Code Legacy** : PRO-006
 
 ## Contexte & Réalisation
 Suggestions dynamiques avec matching NFD (insensible aux accents et majuscules).

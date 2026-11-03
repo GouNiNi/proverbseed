@@ -1,9 +1,8 @@
-# [PRO-007] Lecture continue par catégorie après validation
+# Lecture continue par catégorie après validation
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
 - **Statut** : done
-- **Code Legacy** : PRO-007
 
 ## Contexte & Réalisation
 Redirection automatique vers la vue de lecture du 1er thème associé lors de la validation des étiquettes d'un proverbe depuis l'écran d'accueil (débrayable dans les Réglages).

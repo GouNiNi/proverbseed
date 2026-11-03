@@ -12,7 +12,7 @@ import {
     formatLastBackupDate
 } from '../../src/utils/backupUtils.js';
 
-describe('backupUtils — Validation et création de sauvegarde (PRO-001)', () => {
+describe('backupUtils — Validation et création de sauvegarde', () => {
     it('génère un payload de sauvegarde valide avec les métadonnées', () => {
         const payload = createBackupPayload({
             user_themes: ['Sagesse', 'Justice'],
@@ -89,7 +89,7 @@ describe('backupUtils — Validation et création de sauvegarde (PRO-001)', () =
     });
 });
 
-describe('backupUtils — Partage natif et rappel contextuel (PRO-012)', () => {
+describe('backupUtils — Partage natif et rappel contextuel', () => {
     it('isSaveFilePickerSupported retourne false en environnement Node / sans window.showSaveFilePicker', () => {
         assert.strictEqual(isSaveFilePickerSupported(), false);
     });

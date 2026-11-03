@@ -1,4 +1,4 @@
-# [PRO-012] Automatisation des sauvegardes (Google Drive, Pastille & Notification In-App)
+# Automatisation des sauvegardes (Google Drive, Pastille & Notification In-App)
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne

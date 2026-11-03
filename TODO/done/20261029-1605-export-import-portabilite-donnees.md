@@ -1,9 +1,8 @@
-# [PRO-001] Export / Import (Portabilité des données)
+# Export / Import (Portabilité des données)
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Haute
 - **Statut** : done
-- **Code Legacy** : PRO-001
 
 ## Contexte & Objectif
 Permettre à l'utilisateur de sauvegarder et restaurer ses données locales sans dépendre d'un serveur au format JSON avec validation de schéma stricte.

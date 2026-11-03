@@ -1,9 +1,8 @@
-# [PRO-004] Vue "Lecture continue" par thème
+# Vue "Lecture continue" par thème
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
 - **Statut** : done
-- **Code Legacy** : PRO-004
 
 ## Contexte & Réalisation
 Ajouter un mode d'affichage épuré et continu des proverbes d'un thème pour la contemplation.

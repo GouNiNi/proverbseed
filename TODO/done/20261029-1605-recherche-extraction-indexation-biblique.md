@@ -1,9 +1,8 @@
-# [PRO-101] Recherche extraction & indexation biblique
+# Recherche extraction & indexation biblique
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
 - **Statut** : done
-- **Code Legacy** : PRO-101
 
 ## Contexte & Réalisation
 Étude des outils et formats pour le texte biblique (Louis Segond 1910).

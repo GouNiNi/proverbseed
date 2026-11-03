@@ -1,4 +1,4 @@
-# [PRO-009] Classement alphabétique insensible aux accents (Bibliothèque)
+# Classement alphabétique insensible aux accents (Bibliothèque)
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne

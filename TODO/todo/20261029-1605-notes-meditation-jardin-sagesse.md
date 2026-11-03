@@ -1,9 +1,8 @@
-# [PRO-003] Notes de Méditation & Jardin de Sagesse
+# Notes de Méditation & Jardin de Sagesse
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Haute
 - **Statut** : todo
-- **Code Legacy** : PRO-003
 
 ## Contexte & Objectif
 Implémenter la saisie de notes sur les proverbes et le système de progression du Jardin de Sagesse.

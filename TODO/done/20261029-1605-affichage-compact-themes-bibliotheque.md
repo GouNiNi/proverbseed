@@ -1,4 +1,4 @@
-# [PRO-011] Affichage compact des thèmes dans la Bibliothèque
+# Affichage compact des thèmes dans la Bibliothèque
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Basse

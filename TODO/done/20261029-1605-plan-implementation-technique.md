@@ -1,9 +1,8 @@
-# [PRO-103] Plan d'implémentation technique
+# Plan d'implémentation technique
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
 - **Statut** : done
-- **Code Legacy** : PRO-103
 
 ## Contexte & Réalisation
 Validation de l'architecture logicielle et de la structure du projet.

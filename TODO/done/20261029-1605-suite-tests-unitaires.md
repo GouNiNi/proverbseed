@@ -1,4 +1,4 @@
-# [PRO-010] Suite de tests unitaires et intégration au workflow
+# Suite de tests unitaires et intégration au workflow
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Haute

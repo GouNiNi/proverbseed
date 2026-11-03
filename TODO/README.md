@@ -25,7 +25,7 @@ Pour éviter toute collision lors de créations concurrentes par plusieurs agent
 YYYYMMDD-HHMM-[slug-court].md
 ```
 
-*Exemple :* `20261029-1605-pro-001-export-import-portabilite-donnees.md`
+*Exemple :* `20261029-1605-export-import-portabilite-donnees.md`
 
 ---
 
