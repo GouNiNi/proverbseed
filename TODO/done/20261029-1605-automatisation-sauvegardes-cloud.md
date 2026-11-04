@@ -2,7 +2,7 @@
 
 - **Date de création** : 2026-10-29 16:05
 - **Priorité** : Moyenne
-- **Statut** : tovalidate
+- **Statut** : done
 
 ## Contexte & Objectif
 Prévenir la perte des données locales utilisateur sans réimplémenter d'authentification Google OAuth lourde, en s'appuyant sur les capacités natives de l'OS (File System Access API et Web Share API) combinées à un suivi contextuel de sauvegarde, une pastille visuelle sur le menu et une notification in-app au bout de deux fois le délai réglé.
