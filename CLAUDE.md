@@ -144,9 +144,7 @@ cd push-worker && npx wrangler deploy
 
 ## Git — worktree
 
-Le développement se fait dans le worktree `.claude/worktrees/stupefied-jang` (branche `claude/stupefied-jang`).
-On pousse vers `main` via : `git push origin claude/stupefied-jang:main`
-`npm run deploy` fait ça + sync le repo principal local automatiquement.
+Workflow standard : voir « Workflow Multi-Agent & Release » plus haut (worktree `.worktrees/<ticket>`, release sur `main` depuis le dépôt principal). Ne pas utiliser `npm run deploy` : il pousse `HEAD:main` sans passer par le pipeline et vise un chemin de Mac.
 
 Le déploiement du site se fait via **webhook GitHub → serveur** à chaque push sur `main`.
 
