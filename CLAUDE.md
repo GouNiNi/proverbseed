@@ -44,7 +44,7 @@ Le projet utilise le runner natif Node.js (`node:test`) pour tester les fonction
 2. **Dev & Tests dans le worktree :** `npm test` (100% vert).
 3. **Pipeline de Release sur `main` dans le dépôt principal :**
    ```bash
-   cd /Users/gounini/Documents/ia-workspace/proverbseed
+   cd "$(git rev-parse --path-format=absolute --git-common-dir)/.."
    git checkout main && git fetch origin && git rebase origin/main && git merge feature/<ticket>
    npm run bump-version <micro|mineur|majeur>
    npm run build
